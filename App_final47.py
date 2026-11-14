@@ -1,12 +1,13 @@
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 47 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final47.py
+
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 52 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final52.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
 from io import BytesIO
 import re
 DOCENTE="Mario Alberto Diaz Becerra"
-st.set_page_config(page_title="Mis Trabajos y Calificaciones", layout="wide")
+st.set_page_config(page_title="Mis Trabajos y Calificaciones", layout="centered", initial_sidebar_state="collapsed")
 DIAS_ES=["lunes","martes","miércoles","jueves","viernes","sábado","domingo"]
 MESES_ES=["","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
 OPCIONES_DIAS=["Lunes","Martes","Miércoles","Jueves","Viernes"]
@@ -15,9 +16,39 @@ def fecha_bonita(f):
     return f"{DIAS_ES[f.weekday()]} {f.day} de {MESES_ES[f.month]} de {f.year}"
 def fecha_corta(f):
     return f"{DIAS_ES[f.weekday()]} {f.day} de {MESES_ES[f.month]}"
-# CSS SUPER MINIMO - NADA QUE TAPE EL UPLOAD, NADA QUE EMPALME
+# CSS PARA TELEFONO - para que quepa todo y no salga grandote
+# En la compu se ve igual. En el telefono: letra mas chica, botones grandes para el dedo, columnas una abajo de otra, tablas con scroll.
 st.markdown("""<style>
 h1, h2, h3 { color: #FFD400 !important; }
+/* Quitar el espacio gigante de los lados en telefono */
+.block-container { padding-top: 1rem !important; padding-left: 0.8rem !important; padding-right: 0.8rem !important; max-width: 100% !important; }
+/* Botones grandes para el dedo, que quepan */
+.stButton > button { width: 100% !important; min-height: 48px !important; font-size: 16px !important; white-space: normal !important; height: auto !important; padding: 10px 12px !important; }
+.stDownloadButton > button { width: 100% !important; min-height: 48px !important; font-size: 16px !important; white-space: normal !important; height: auto !important; }
+/* Que no haga zoom al picar en los cuadritos en el telefono */
+input, select, textarea { font-size: 16px !important; }
+/* Tablas con scroll a los lados, no aplastadas */
+[data-testid="stDataFrame"], [data-testid="stTable"] { overflow-x: auto !important; }
+/* Encabezado: foto + titulo */
+.encabezado-wrap { display: flex; justify-content: center; margin: 0; padding: 0; }
+.encabezado-box { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; width: fit-content; max-width: 100%; }
+.encabezado-foto img { height: 120px !important; width: auto !important; object-fit: contain; display: block; }
+.encabezado-titulo { font-size: clamp(22px, 6vw, 44px); font-weight: 800; color: #FFD400; line-height: 1.05; white-space: normal; }
+.encabezado-docente { font-size: clamp(14px, 4vw, 22px); color: white; margin-top: 6px; white-space: normal; }
+/* SOLO EN TELEFONO (menos de 768px): todo mas chico y columnas una abajo de otra */
+@media (max-width: 768px) {
+  .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; }
+  h1 { font-size: 26px !important; line-height: 1.15 !important; }
+  h2 { font-size: 22px !important; line-height: 1.15 !important; }
+  h3 { font-size: 19px !important; line-height: 1.2 !important; }
+  p, li, div { font-size: 16px !important; }
+  /* Columnas de Streamlit: en telefono una abajo de otra, no aplastadas a los lados */
+  [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
+  [data-testid="stHorizontalBlock"] > div { flex: 1 1 100% !important; min-width: 0 !important; max-width: 100% !important; }
+  .encabezado-box { flex-wrap: wrap; justify-content: center; text-align: center; }
+  .encabezado-foto img { height: 90px !important; }
+  .encabezado-titulo, .encabezado-docente { text-align: center; }
+}
 </style>""", unsafe_allow_html=True)
 
 # ===== FOTO EN CÍRCULO, SIN FONDO, CHIQUITA - NO ABARCA ESPACIO =====
@@ -44,17 +75,16 @@ def mostrar_encabezado():
             with open("foto_profe.png", "rb") as _f:
                 st.session_state.foto_docente = _f.read()
             b64 = base64.b64encode(st.session_state.foto_docente).decode()
-        img = f'<img src="data:image/png;base64,{b64}" style="height:220px;width:auto;object-fit:contain;background:transparent;display:block;">' if b64 else ""
-        # El truco: afuera centra TODO el bloque junto, adentro foto y titulo van PEGADOS.
-        # Antes el titulo se centraba solo en lo que sobraba a la derecha, por eso quedaba hueco a la izquierda y hueco a la derecha.
-        # Ahora foto + titulo son un solo bloque pegado, sin hueco entre ellos y sin hueco despues del titulo.
+        img = f'<img src="data:image/png;base64,{b64}">' if b64 else ""
+        # CORREGIDO PARA TELEFONO: antes la foto era 220px fija y el titulo 50px con nowrap, por eso en el telefono no cabia y salia grandote.
+        # Ahora usa clases del CSS: en compu grande, en telefono chico y con salto de linea, no aplastado.
         html = f"""
-<div style="display:flex;justify-content:center;margin:0;padding:0;">
-  <div style="display:flex;align-items:center;gap:8px;margin:0;padding:0;width:fit-content;max-width:100%;">
-    <div style="flex:0 0 auto;line-height:0;">{img}</div>
+<div class="encabezado-wrap">
+  <div class="encabezado-box">
+    <div class="encabezado-foto" style="flex:0 0 auto;line-height:0;">{img}</div>
     <div style="flex:0 1 auto;text-align:left;line-height:1.1;">
-      <div style="font-size:50px;font-weight:800;color:#FFD400;white-space:nowrap;line-height:1;">⭐ Mis Trabajos y Calificaciones</div>
-      <div style="font-size:24px;color:white;margin-top:8px;white-space:nowrap;">Docente: Mario Alberto Diaz Becerra</div>
+      <div class="encabezado-titulo">⭐ Mis Trabajos y Calificaciones</div>
+      <div class="encabezado-docente">Docente: Mario Alberto Diaz Becerra</div>
     </div>
   </div>
 </div>
@@ -80,7 +110,14 @@ def _cargar_listas_archivo():
         if os.path.exists("listas.json"):
             with open("listas.json", "r", encoding="utf-8") as _f:
                 _d = json.load(_f)
-            return _d.get("alumnos", []), _d.get("registros", [])
+            _als = _d.get("alumnos", [])
+            # Quitar repetidos: mismo nombre + grupo + escuela = uno solo. Si subiste 2 veces el mismo PDF, se duplicaba.
+            _vistos = set(); _limpios = []
+            for _a in _als:
+                _k = (_a.get("Nombre","").strip().lower(), _a.get("Grupo",""), _a.get("Escuela",""))
+                if _k not in _vistos:
+                    _vistos.add(_k); _limpios.append(_a)
+            return _limpios, _d.get("registros", [])
     except:
         pass
     return [], []
@@ -225,6 +262,23 @@ def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - Qu
     import fitz
     doc=fitz.open(stream=datos_pdf, filetype="pdf")
     total=0; por_grupo={}
+    # Si el PDF si dice de que escuela es adentro, y no coincide con la que elegiste, no cargarlo
+    _todo=""
+    try:
+        for _pp in doc:
+            _todo += " " + _pp.get_text().upper()
+    except: pass
+    _esc_pdf=None
+    if "TOMAS GAMEROS" in _todo: _esc_pdf="TOMAS GAMEROS # 2131"
+    elif "UNIDAD PROLETARIA" in _todo: _esc_pdf="UNIDAD PROLETARIA # 2294"
+    elif "SECUNDARIA" in _todo and "3046" in _todo: _esc_pdf="ESCUELA SECUNDARIA ESTATAL # 3046"
+    # YA NO bloquear por lo que dice el PDF adentro. Si tu dices que es de UNIDAD, se carga en UNIDAD.
+    # Antes si el PDF traia la palabra TOMAS en cualquier parte, lo bloqueaba o lo metia en TOMAS aunque lo subieras en UNIDAD.
+    # Ahora solo avisar, no bloquear. Tu eleccion manda.
+    if _esc_pdf and _esc_pdf!=escuela:
+        textos_debug_aviso = [f"AVISO: Este PDF dice adentro que es de {_esc_pdf}, pero tu elegiste cargarlo en {escuela}. Se va a cargar en {escuela} porque tu lo elegiste."]
+    else:
+        textos_debug_aviso = []
     textos_debug=[]
     # Si viene grupo forzado como "3A" o "1B", ese manda en todas las paginas
     grupo_fijo=None
@@ -237,24 +291,25 @@ def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - Qu
             textos_debug.append(texto_pag[:1200])
         grupo_actual=grupo_fijo
         if grupo_actual is None:
-            # Intentar detectar grupo de MUCHAS formas, porque cada PDF viene diferente
-            limpio=re.sub(r"[^A-Z0-9]+", " ", texto_pag.upper())
+            # ARREGLO UNIDAD 2A: buscar el grupo SOLO en el encabezado de la pagina (primeros 800 caracteres).
+            # Antes buscaba en TODA la hoja y agarraba el primer 1A que veia en cualquier parte, aunque la hoja fuera de 2A, y por eso te ponia los mismos de TOMAS.
+            texto_encabezado = texto_pag[:800]
+            limpio=re.sub(r"[^A-Z0-9]+", " ", texto_encabezado.upper())
             m=re.search(r"GRADO GRUPO (\d) ([ABC])", limpio)
             if m: grupo_actual=m.group(1)+m.group(2).upper()
             else:
                 # Buscar "3 - A", "3-A", "3 A", "GRUPO 3A", "3A", "TERCERO A", etc.
-                cands=re.findall(r"\b([1-6])\s*[- ]\s*([ABC])\b", texto_pag.upper())
+                cands=re.findall(r"\b([1-6])\s*[- ]\s*([ABC])\b", texto_encabezado.upper())
                 if cands: grupo_actual=cands[0][0]+cands[0][1].upper()
                 else:
-                    m2=re.search(r"GRUPO\s*([1-6])\s*([ABC])", texto_pag.upper())
+                    m2=re.search(r"GRUPO\s*([1-6])\s*([ABC])", texto_encabezado.upper())
                     if m2: grupo_actual=m2.group(1)+m2.group(2).upper()
                     else:
-                        m3=re.search(r"\b([1-6])([ABC])\b", texto_pag.upper())
+                        m3=re.search(r"\b([1-6])([ABC])\b", texto_encabezado.upper())
                         if m3: grupo_actual=m3.group(1)+m3.group(2).upper()
                         else:
-                            # Por nombre del archivo: si el archivo se llama 3A, usar eso
-                            mf=re.search(r"([1-6])[\s_-]*([ABC])", nombre_archivo.upper())
-                            if mf: grupo_actual=mf.group(1)+mf.group(2).upper()
+                            # YA NO adivinar por el nombre del archivo
+                            pass
         if not grupo_actual:
             continue
         # Leer nombres de MUCHAS formas: con numero de lista, sin numero, con apellidos primero, con CURP, etc.
@@ -735,7 +790,7 @@ if not modo_lista:
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 47 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 52 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -746,10 +801,33 @@ if not modo_lista:
             else:
                 st.write(f"Aquí subes el PDF de **{escuela}**.")
             st.write("")
-            archivos_pdf=st.file_uploader("Sube aquí tus PDFs - Puedes subir 1 o 2 juntos", type=["pdf"], accept_multiple_files=True, key=f"pdfs_{escuela}_36")
+            st.warning(f"⚠️ Estás cargando en: **{escuela}**. Si este PDF es de OTRA escuela, cámbiala aquí, si no te la mete en la equivocada.")
+            escuela_pdf = st.selectbox("¿De qué escuela es este PDF? Tú lo eliges, ya no adivina", ["TOMAS GAMEROS # 2131", "UNIDAD PROLETARIA # 2294", "ESCUELA SECUNDARIA ESTATAL # 3046"], index=["TOMAS GAMEROS # 2131", "UNIDAD PROLETARIA # 2294", "ESCUELA SECUNDARIA ESTATAL # 3046"].index(escuela) if escuela in ["TOMAS GAMEROS # 2131", "UNIDAD PROLETARIA # 2294", "ESCUELA SECUNDARIA ESTATAL # 3046"] else 0, key=f"escuela_pdf_{escuela}_51")
+            # Contador para poder dejar el Upload en blanco cuando le picas a Quitar
+            if f"contador_upload_{escuela}" not in st.session_state:
+                st.session_state[f"contador_upload_{escuela}"] = 0
+            if f"pdfs_quitados_{escuela}" not in st.session_state:
+                st.session_state[f"pdfs_quitados_{escuela}"] = []
+            archivos_pdf=st.file_uploader("Sube aquí tus PDFs - Puedes subir 1 o 2 juntos", type=["pdf"], accept_multiple_files=True, key=f"pdfs_{escuela}_{st.session_state[f'contador_upload_{escuela}']}")
             st.write("")
             if archivos_pdf:
+                # Quitar los que ya quitaste antes
+                archivos_pdf = [f for f in archivos_pdf if f.name not in st.session_state[f"pdfs_quitados_{escuela}"]]
                 st.write(f"Archivos que elegiste: **{len(archivos_pdf)}**")
+                # BOTON PARA DEJAR TODO EN BLANCO
+                if st.button("🗑️ Quitar todos los PDFs y dejar en blanco", key=f"btn_quitar_todos_{escuela}_52"):
+                    st.session_state[f"pdfs_quitados_{escuela}"] = []
+                    st.session_state[f"contador_upload_{escuela}"] = st.session_state[f"contador_upload_{escuela}"] + 1
+                    st.rerun()
+                # BOTON POR CADA ARCHIVO PARA ELIMINARLO EN ESE MOMENTO
+                for _f_q in list(archivos_pdf):
+                    col_q1, col_q2 = st.columns([3, 1])
+                    with col_q1:
+                        st.write(f"📄 {_f_q.name}")
+                    with col_q2:
+                        if st.button(f"🗑️ Quitar", key=f"btn_quitar_{escuela}_{_f_q.name}_52"):
+                            st.session_state[f"pdfs_quitados_{escuela}"].append(_f_q.name)
+                            st.rerun()
                 # Por cada archivo, un selector de grupo - ESTO ES LO QUE ARREGLA LO DE 3A
                 grupos_por_archivo={}
                 for idx_f, f in enumerate(archivos_pdf):
@@ -770,19 +848,25 @@ if not modo_lista:
                         try:
                             # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
                             if opcion_elegida=="3A y 3B juntos - Electrónica":
-                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela, f.name, "Auto - Que el programa lo detecte")
+                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Auto - Que el programa lo detecte")
                                 if total_uno==0:
                                     # Si no detectó nada, probar forzando 3A y luego 3B por separado no funciona, así que mostrar diagnóstico
                                     st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
                             else:
                                 # Convertir "3A - Electrónica" -> "3A", "1B - Artes" -> "1B"
                                 grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Auto - Que el programa lo detecte" else opcion_elegida
-                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela, f.name, grupo_forzado)
+                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, grupo_forzado)
+                            if "ERROR_ESCUELA" in por_grupo_uno:
+                                st.error(f"❌ {f.name}: {por_grupo_uno['ERROR_ESCUELA']} No se cargó nada, para no mezclar escuelas.")
                             total_general+=total_uno
                             for g,c in por_grupo_uno.items():
                                 por_grupo_total[g]=por_grupo_total.get(g,0)+c
                             if total_uno==0:
-                                st.error(f"❌ {f.name}: se agregaron 0 alumnos - {por_grupo_uno}")
+                                _ya = len([a for a in st.session_state.alumnos if a["Escuela"]==escuela])
+                                if _ya>0:
+                                    st.warning(f"⚠️ {f.name}: se agregaron 0 NUEVOS porque esos alumnos YA estaban cargados. Tienes {_ya} alumnos en {escuela}. No es error, no los duplica.")
+                                else:
+                                    st.error(f"❌ {f.name}: se agregaron 0 alumnos - No entendí este PDF. Fíjate que sea el PDF de {escuela} y que sea lista de alumnos, no el concentrado ni la ficha. Abajo pícale a 'Ver qué sí leyó' para ver qué leyó.")
                                 with st.expander(f"🔍 Ver qué sí leyó el programa de {f.name} - Pícale aquí"):
                                     st.write("Esto es lo que el programa sí pudo leer de las primeras 2 páginas.")
                                     if debug:
@@ -836,14 +920,14 @@ if not modo_lista:
                     try:
                         # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
                         if opcion_elegida=="3A y 3B juntos - Electrónica":
-                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela, f.name, "Auto - Que el programa lo detecte")
+                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Auto - Que el programa lo detecte")
                             if total_uno==0:
                                 # Si no detectó nada, probar forzando 3A y luego 3B por separado no funciona, así que mostrar diagnóstico
                                 st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
                         else:
                             # Convertir "3A - Electrónica" -> "3A", "1B - Artes" -> "1B"
                             grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Auto - Que el programa lo detecte" else opcion_elegida
-                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela, f.name, grupo_forzado)
+                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, grupo_forzado)
                         total_general+=total_uno
                         for g,c in por_grupo_uno.items():
                             por_grupo_total[g]=por_grupo_total.get(g,0)+c
@@ -874,6 +958,18 @@ if not modo_lista:
     if not alumnos_esc:
         st.info(f"Todavía no tienes alumnos en {escuela}. Sube los PDFs arriba.")
         st.stop()
+    # Boton para arreglar el 2A: 64 alumnos (duplicados por subir 2 veces el mismo PDF)
+    if st.button(f"🧹 Limpiar alumnos repetidos de {escuela}", key=f"btn_limpiar_dup_{escuela}_49"):
+        _antes = len(st.session_state.alumnos)
+        _vistos2 = set(); _limp2 = []
+        for _a in st.session_state.alumnos:
+            _k2 = (_a.get("Nombre","").strip().lower(), _a.get("Grupo",""), _a.get("Escuela",""))
+            if _k2 not in _vistos2:
+                _vistos2.add(_k2); _limp2.append(_a)
+        st.session_state.alumnos = _limp2
+        _guardar_listas_archivo()
+        st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
+        st.rerun()
     st.subheader(f"📋 2. Elige el grupo de {escuela}")
     grupos_disponibles=sorted(set(a["Grupo"] for a in alumnos_esc))
     opciones_grupo=["-- Elige un grupo --"]+grupos_disponibles
