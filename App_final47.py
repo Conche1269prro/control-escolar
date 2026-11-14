@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 62 - SOLO FICHA O SOLO LISTA - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final62.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 63 - FICHA SOLA SIN NameError - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final63.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -311,7 +311,7 @@ def riesgo_de_alumno(nombre, escuela, grupo):
 def trimestre_terminado():
     return hoy > st.session_state.tri_fin
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas"):
-    # FINAL 62 - SOLO FICHA O SOLO LISTA REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 63 - FICHA SOLA SIN NameError REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     if grupo_forzado == "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" or not grupo_forzado:
@@ -754,6 +754,15 @@ if modo_lista:
     dias_clase_grupo = _dias_pre if _dias_pre else [0]
     nombres_dias_grupo = [DIAS_ES[d] for d in dias_clase_grupo]
     llave_dias = _llave_dias_pre
+# FINAL 63 ARREGLO NameError grupo_sel: si estas en la FICHA, tambien definir grupo_sel aunque no se muestre configurar.
+# Antes al esconder configurar, grupo_sel no existia y la ficha se caia en la linea 1082.
+if st.session_state.get("alumno_activo") is not None:
+    grupo_sel = st.session_state.get("grupo_confirmado") or _grupo_pre
+    alumnos_esc = _alumnos_esc_pre
+    _llave_ficha = f"{escuela}|{grupo_sel}"
+    dias_clase_grupo = st.session_state.dias_clase.get(_llave_ficha, [0])
+    nombres_dias_grupo = [DIAS_ES[d] for d in dias_clase_grupo]
+    llave_dias = _llave_ficha
 # ===== ENCABEZADO FIJO ADENTRO - MISMO QUE EN PORTADA =====
 mostrar_encabezado()
 if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62: si estas en la ficha, NO mostrar configurar. Solo ficha.
@@ -800,7 +809,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 62 - SOLO FICHA O SOLO LISTA - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 63 - FICHA SOLA SIN NameError - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -991,7 +1000,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 62 - SOLO FICHA O SOLO LISTA: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 63 - FICHA SOLA SIN NameError: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
