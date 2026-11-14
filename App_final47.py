@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 63 - FICHA SOLA SIN NameError - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final63.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final65.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -311,12 +311,20 @@ def riesgo_de_alumno(nombre, escuela, grupo):
 def trimestre_terminado():
     return hoy > st.session_state.tri_fin
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas"):
-    # FINAL 63 - FICHA SOLA SIN NameError REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
+    # FINAL 65: si es MIXTO (1B y 3C juntos, o 3A y 3B juntos), no es error. Se detecta por pagina.
+    es_mixto = isinstance(grupo_forzado, str) and grupo_forzado.startswith("MIXTO_")
     if grupo_forzado == "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" or not grupo_forzado:
         return 0, {"ERROR_GRUPO": "Elige el grupo a mano arriba, no lo dejes en Auto. Asi no se mezcla."}, ["Elige el grupo a mano."]
-    grupo_fijo = grupo_forzado[:2].strip().upper()
+    if es_mixto:
+        # MIXTO_1B_3C -> grupos = ["1B","3C"]
+        _partes = grupo_forzado.replace("MIXTO_","").split("_")
+        grupos_mixto = _partes
+        grupo_fijo = grupos_mixto[0]
+    else:
+        grupo_fijo = grupo_forzado[:2].strip().upper()
     doc = fitz.open(stream=datos_pdf, filetype="pdf")
     total = 0
     por_grupo = {}
@@ -326,6 +334,15 @@ def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el 
         if num_pag < 2:
             textos_debug.append(texto_pag[:1200])
         grupo_actual = grupo_fijo
+        if es_mixto:
+            # Buscar en la pagina cual grupo dice: "1B", "3C", "3A", "3B". El que aparezca mas, ese es el grupo de esa pagina.
+            _txt_up = texto_pag.upper()
+            _mejor = grupo_fijo; _mejor_n = 0
+            for _g in grupos_mixto:
+                _n = _txt_up.count(_g)
+                if _n > _mejor_n:
+                    _mejor_n = _n; _mejor = _g
+            grupo_actual = _mejor
         lineas = texto_pag.split("\n")
         for linea in lineas:
             linea_original = linea.strip()
@@ -367,6 +384,13 @@ def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el 
     for pagina in doc:
         texto_pag = pagina.get_text()
         grupo_pag = grupo_fijo
+        if es_mixto:
+            _txt_up2 = texto_pag.upper(); _mejor2 = grupo_fijo; _mejor_n2 = 0
+            for _g in grupos_mixto:
+                _n2 = _txt_up2.count(_g)
+                if _n2 > _mejor_n2:
+                    _mejor_n2 = _n2; _mejor2 = _g
+            grupo_pag = _mejor2
         lineas = [l.strip() for l in texto_pag.split("\n")]
         idx = 0
         while idx < len(lineas):
@@ -809,7 +833,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 63 - FICHA SOLA SIN NameError - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -860,7 +884,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"---")
                     st.write(f"**Archivo {idx_f+1}: {f.name}**")
                     if escuela=="ESCUELA SECUNDARIA ESTATAL # 3046":
-                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica"], key=f"grupo_pdf_{idx_f}_36")
+                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"], key=f"grupo_pdf_{idx_f}_36")
                     else:
                         opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
                     grupos_por_archivo[f.name]=opcion
@@ -873,8 +897,9 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                         opcion_elegida=grupos_por_archivo.get(f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
                         try:
                             # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
-                            if opcion_elegida=="3A y 3B juntos - Electrónica":
-                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
+                            if opcion_elegida in ("3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"):
+                                _mixto = "MIXTO_1B_3C" if opcion_elegida=="1B y 3C juntos - Secundaria" else "MIXTO_3A_3B"
+                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, _mixto)
                                 if total_uno==0:
                                     # Si no detectó nada, probar forzando 3A y luego 3B por separado no funciona, así que mostrar diagnóstico
                                     st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
@@ -888,7 +913,8 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                                 st.error(f"❌ {f.name}: {por_grupo_uno['ERROR_ESCUELA']} No se cargó nada, para no mezclar escuelas.")
                             total_general+=total_uno
                             for g,c in por_grupo_uno.items():
-                                por_grupo_total[g]=por_grupo_total.get(g,0)+c
+                                if isinstance(c, (int, float)):
+                                    por_grupo_total[g]=por_grupo_total.get(g,0)+c
                             if total_uno==0:
                                 _ya = len([a for a in st.session_state.alumnos if a["Escuela"]==escuela])
                                 if _ya>0:
@@ -936,7 +962,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                 st.write(f"---")
                 st.write(f"**Archivo {idx_f+1}: {f.name}**")
                 if escuela=="ESCUELA SECUNDARIA ESTATAL # 3046":
-                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica"], key=f"grupo_pdf_{idx_f}_36")
+                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"], key=f"grupo_pdf_{idx_f}_36")
                 else:
                     opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
                 grupos_por_archivo[f.name]=opcion
@@ -949,8 +975,9 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     opcion_elegida=grupos_por_archivo.get(f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
                     try:
                         # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
-                        if opcion_elegida=="3A y 3B juntos - Electrónica":
-                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
+                        if opcion_elegida in ("3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"):
+                            _mixto = "MIXTO_1B_3C" if opcion_elegida=="1B y 3C juntos - Secundaria" else "MIXTO_3A_3B"
+                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, _mixto)
                             if total_uno==0:
                                 # Si no detectó nada, probar forzando 3A y luego 3B por separado no funciona, así que mostrar diagnóstico
                                 st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
@@ -958,9 +985,15 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                             # Convertir "3A - Electrónica" -> "3A", "1B - Artes" -> "1B"
                             grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" else opcion_elegida
                             total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, grupo_forzado)
+                        # FINAL 64 ARREGLO int+str: si no elegiste grupo, por_grupo_uno trae ERROR_GRUPO con texto, no numeros. No sumar, solo avisar.
+                        if "ERROR_GRUPO" in por_grupo_uno:
+                            st.error(f"❌ {f.name}: {por_grupo_uno['ERROR_GRUPO']} - Elige arriba el grupo, por ejemplo 2A, y vuelve a picarle a Cargar.")
+                            continue
                         total_general+=total_uno
                         for g,c in por_grupo_uno.items():
-                            por_grupo_total[g]=por_grupo_total.get(g,0)+c
+                            # Solo sumar si c es numero, por si viene texto
+                            if isinstance(c, (int, float)):
+                                por_grupo_total[g]=por_grupo_total.get(g,0)+c
                         if total_uno==0:
                             st.error(f"❌ {f.name}: se agregaron 0 alumnos - {por_grupo_uno}")
                             with st.expander(f"🔍 Ver qué sí leyó el programa de {f.name} - Pícale aquí"):
@@ -1000,7 +1033,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 63 - FICHA SOLA SIN NameError: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
