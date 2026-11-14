@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 58 - 4 MODOS SIN CORTE - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final58.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 62 - SOLO FICHA O SOLO LISTA - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final62.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -75,6 +75,19 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] { overflo
   .block-container { max-width: 1100px !important; }
   .encabezado-foto img { height: 130px !important; }
   .encabezado-titulo { font-size: 38px !important; }
+}
+/* ANTI-EMPALME CELULAR FINAL 62: botones que no se cortan, se parten en 2 renglones */
+@media (max-width: 600px) {
+  .stButton > button, .stDownloadButton > button { white-space: normal !important; overflow-wrap: anywhere !important; text-overflow: clip !important; height: auto !important; min-height: 52px !important; line-height: 1.2 !important; }
+  [data-testid="stVerticalBlock"] { overflow-x: hidden !important; }
+}
+/* ANTI-EMPALME CELULAR FINAL 61: nada se encima, todo una abajo de otra, con aire */
+@media (max-width: 600px) {
+  [data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 12px !important; }
+  [data-testid="stHorizontalBlock"] > div { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+  .stButton > button, .stDownloadButton > button { margin-bottom: 8px !important; }
+  [data-testid="stVerticalBlock"] > div { overflow: visible !important; }
+  h1, h2, h3 { overflow-wrap: anywhere !important; }
 }
 /* TV / PANTALLA GRANDE: mas de 1921px - todo gigante para que se vea de lejos */
 @media (min-width: 1921px) {
@@ -152,6 +165,9 @@ def _cargar_listas_archivo():
             # Quitar repetidos: mismo nombre + grupo + escuela = uno solo. Si subiste 2 veces el mismo PDF, se duplicaba.
             _vistos = set(); _limpios = []
             for _a in _als:
+                # FINAL 60: si un alumno no tiene escuela, no lo metas en ninguna. Antes se colaba en la primera escuela que abrías.
+                if not _a.get("Escuela"):
+                    continue
                 _k = (_a.get("Nombre","").strip().lower(), _a.get("Grupo",""), _a.get("Escuela",""))
                 if _k not in _vistos:
                     _vistos.add(_k); _limpios.append(_a)
@@ -295,7 +311,7 @@ def riesgo_de_alumno(nombre, escuela, grupo):
 def trimestre_terminado():
     return hoy > st.session_state.tri_fin
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas"):
-    # FINAL 58 - 4 MODOS SIN CORTE REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 62 - SOLO FICHA O SOLO LISTA REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     if grupo_forzado == "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" or not grupo_forzado:
@@ -394,21 +410,21 @@ def _limpiar_valor_pdf(v):
         "⏰ Retardo - Reloj": "Retardo",
         "📄✅ Entregó - Hoja con palomita": "Entrego el trabajo",
         "📄❌ No entregó - Hoja rota": "No entrego el trabajo",
-        "📄❓ No trajo material - Signo de pregunta": "No trajo material",
+        "Sin material de trabajo": "Sin material de trabajo",
         "✉️ Entregó - Sobre enviado": "Entrego la tarea",
         "✉️❌ No entregó - Sobre tachado": "No entrego la tarea",
-        "😡 No trabajó - Cara enojada": "No trabajo",
+        "Actividad no realizada": "Actividad no realizada",
         "😊 Asistió": "Asistio",
         "😢 Falta": "Falta",
         "⏰ Retardo": "Retardo",
         "📄✅ Entregó": "Entrego el trabajo",
         "📄❌ No entregó": "No entrego el trabajo",
-        "📄❓ No trajo material": "No trajo material",
+        "Sin material de trabajo": "No trajo material",
         "✉️ Entregó": "Entrego la tarea",
         "✉️❌ No entregó": "No entrego la tarea",
-        "😡 No trabajó": "No trabajo",
-        "😡 No trajo material": "No trajo material",
-        "😡 Falta de respeto": "Falta de respeto",
+        "Actividad no realizada": "Actividad no realizada",
+        "Sin material de trabajo": "Sin material de trabajo",
+        "Falta de respeto a compañero o docente": "Falta de respeto a compañero o docente",
         "No se pidió": "No se pidio",
         "No se pidio": "No se pidio",
         "Ninguna": "Ninguna",
@@ -740,11 +756,17 @@ if modo_lista:
     llave_dias = _llave_dias_pre
 # ===== ENCABEZADO FIJO ADENTRO - MISMO QUE EN PORTADA =====
 mostrar_encabezado()
-if not modo_lista:
+if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62: si estas en la ficha, NO mostrar configurar. Solo ficha.
     if st.session_state.trimestre_cargado and not trimestre_terminado(): st.success(f"✅ {st.session_state.trimestre_cargado_nombre} CARGADO - Del {fecha_bonita(st.session_state.tri_inicio)} al {fecha_bonita(st.session_state.tri_fin)} - Hoy: {fecha_bonita(hoy)}")
     elif st.session_state.trimestre_cargado and trimestre_terminado(): st.info(f"ℹ️ {st.session_state.trimestre_cargado_nombre} ya terminó el {fecha_bonita(st.session_state.tri_fin)}. Carga el siguiente cuando quieras.")
     else: st.warning("⚠️ No has cargado trimestre. Regresa a la portada y pícale a CARGAR ESTE TRIMESTRE.")
     st.header(f"🏫 {escuela}")
+    _n_esta = len([a for a in st.session_state.alumnos if a.get("Escuela")==escuela])
+    _n_otras = len([a for a in st.session_state.alumnos if a.get("Escuela")!=escuela])
+    st.info(f"En {escuela} tienes {_n_esta} alumnos. En las otras escuelas tienes {_n_otras} alumnos (en su cajon, no aqui). Si aqui te salen los de TOMAS, es porque antes se guardaron mal. Picale abajo a Eliminar TODA la lista de esta escuela y vuelve a subirla bien.")
+    _n_esta = len([a for a in st.session_state.alumnos if a.get("Escuela")==escuela])
+    _n_otras = len([a for a in st.session_state.alumnos if a.get("Escuela")!=escuela])
+    st.info(f"📦 En {escuela} tienes {_n_esta} alumnos. En las otras escuelas tienes {_n_otras} alumnos (en su cajón, no aquí). Si aquí te salen los de TOMAS, es porque antes se guardaron mal. Pícale abajo a Eliminar TODA la lista de esta escuela y vuelve a subirla bien.")
     st.write("")
     if st.button("⬅️ Regresar a la portada"):
         _ir_a_portada_limpio()
@@ -778,7 +800,7 @@ if not modo_lista:
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 58 - 4 MODOS SIN CORTE - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 62 - SOLO FICHA O SOLO LISTA - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -790,7 +812,8 @@ if not modo_lista:
                 st.write(f"Aquí subes el PDF de **{escuela}**.")
             st.write("")
             st.warning(f"⚠️ Estás cargando en: **{escuela}**. Si este PDF es de OTRA escuela, cámbiala aquí, si no te la mete en la equivocada.")
-            escuela_pdf = st.selectbox("¿De qué escuela es este PDF? Tú lo eliges, ya no adivina", ["TOMAS GAMEROS # 2131", "UNIDAD PROLETARIA # 2294", "ESCUELA SECUNDARIA ESTATAL # 3046"], index=["TOMAS GAMEROS # 2131", "UNIDAD PROLETARIA # 2294", "ESCUELA SECUNDARIA ESTATAL # 3046"].index(escuela) if escuela in ["TOMAS GAMEROS # 2131", "UNIDAD PROLETARIA # 2294", "ESCUELA SECUNDARIA ESTATAL # 3046"] else 0, key=f"escuela_pdf_{escuela}_51")
+            st.success(f"🔒 Estás cargando en: **{escuela}**. Todo lo que subas aquí se va a {escuela}, no a otra escuela. Ya no se puede cambiar aquí, para que no se mezcle.")
+            escuela_pdf = escuela  # FINAL 60: la escuela es SIEMPRE la de la pagina. Asi UNIDAD ya no agarra lo de TOMAS.
             # Contador para poder dejar el Upload en blanco cuando le picas a Quitar
             if f"contador_upload_{escuela}" not in st.session_state:
                 st.session_state[f"contador_upload_{escuela}"] = 0
@@ -893,6 +916,8 @@ if not modo_lista:
             st.write(f"Aquí subes el PDF de **{escuela}**.")
         st.write("")
         archivos_pdf=st.file_uploader("Sube aquí tus PDFs - Puedes subir 1 o 2 juntos", type=["pdf"], accept_multiple_files=True, key=f"pdfs_{escuela}_36")
+        # ARREGLO ERROR escuela_pdf is not defined: en este bloque (cuando la escuela esta en blanco) no existia esa variable
+        escuela_pdf = escuela
         st.write("")
         if archivos_pdf:
             st.write(f"Archivos que elegiste: **{len(archivos_pdf)}**")
@@ -966,7 +991,7 @@ if not modo_lista:
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 58 - 4 MODOS SIN CORTE: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 62 - SOLO FICHA O SOLO LISTA: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
@@ -1053,9 +1078,8 @@ if not modo_lista:
 if st.session_state.alumno_activo is not None:
     nombre_al=st.session_state.alumno_activo
     st.divider()
-    st.subheader(f"📁 Ficha Personal - {nombre_al}")
-    st.write(f"**Escuela:** {escuela}  •  **Grupo:** {grupo_sel}  •  **Días de clase:** {', '.join(nombres_dias_grupo)}")
-    if st.session_state.trimestre_cargado: st.write(f"**Trimestre cargado:** {st.session_state.trimestre_cargado_nombre} del {fecha_bonita(st.session_state.tri_inicio)} al {fecha_bonita(st.session_state.tri_fin)}")
+    st.subheader(f"📁 {nombre_al}")
+    st.write(f"{escuela}  •  Grupo {grupo_sel}")
     st.write("")
     if st.button("⬅️ Regresar a la lista de "+grupo_sel):
         st.session_state.alumno_activo=None; st.rerun()
@@ -1069,7 +1093,7 @@ if st.session_state.alumno_activo is not None:
     st.subheader("📄 Exportar esta ficha a PDF")
     try:
         pdf_ficha=generar_pdf_ficha_alumno(nombre_al, escuela, grupo_sel)
-        st.download_button(label=f"📄 Generar PDF de la ficha de {nombre_al}", data=pdf_ficha, file_name=f"Ficha_{nombre_al.replace(' ','_')}_{grupo_sel}_{st.session_state.trimestre_cargado_nombre or 'Trimestre'}.pdf", mime="application/pdf", use_container_width=True)
+        st.download_button(label=f"📄 Generar PDF de esta ficha", data=pdf_ficha, file_name=f"Ficha_{nombre_al.replace(' ','_')}_{grupo_sel}_{st.session_state.trimestre_cargado_nombre or 'Trimestre'}.pdf", mime="application/pdf", use_container_width=True)
     except Exception as e:
         st.error(f"No se pudo generar el PDF: {e}. Instala con: py -m pip install reportlab")
     st.divider()
@@ -1115,16 +1139,16 @@ if st.session_state.alumno_activo is not None:
         col1,col2=st.columns(2)
         with col1:
             asistencia=st.selectbox("😊 Asistencia", ["😊 Asistió","😢 Falta","⏰ Retardo"], key="f_asis21")
-            trabajo=st.selectbox("📄 Trabajo", ["📄✅ Entregó","📄❌ No entregó","📄❓ No trajo material","No se pidió"], key="f_trab21")
+            trabajo=st.selectbox("📄 Trabajo", ["📄✅ Entregó","📄❌ No entregó","Sin material de trabajo","No se pidió"], key="f_trab21")
         with col2:
             tarea=st.selectbox("✉️ Tarea", ["✉️ Entregó","✉️❌ No entregó","No se pidió"], key="f_tar21")
-            indis=st.selectbox("😡 Indisciplina", ["Ninguna","😡 No trabajó","😡 No trajo material","😡 Falta de respeto"], key="f_ind21")
-        anotacion=st.text_area("📝 Anotaciones del día", key="f_anot21", placeholder="Ej: No trabajó, se paró mucho...")
+            indis=st.selectbox("Conducta en clase", ["Ninguna","Conversación durante la clase","Falta de respeto a compañero o docente","Se levantó de su lugar sin autorización","No siguió las instrucciones","Sin material de trabajo","Actividad no realizada"], key="f_ind21")
+        anotacion=st.text_area("📝 Anotaciones del día", key="f_anot21", placeholder="Ej: Conversó durante la actividad, se levantó de su lugar...")
         st.write("")
         colg1,colg2=st.columns(2)
         with colg1:
             if puede_capturar:
-                if st.button(f"💾 Guardar captura - {fecha_corta(fecha_captura)}"):
+                if st.button(f"💾 Guardar captura"):
                     ya_existe=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) and r.get("Estado")==asistencia and r.get("Trabajo")==trabajo and r.get("Tarea")==tarea and r.get("Indisciplina")==indis and r.get("Anotacion")==anotacion for r in st.session_state.registros)
                     ya_hay_ese_dia=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) for r in st.session_state.registros)
                     if ya_existe: st.info(f"ℹ️ Ya guardaste esto mismo el {fecha_bonita(fecha_captura)}. No lo guardé otra vez para que no se duplique.")
@@ -1136,7 +1160,7 @@ if st.session_state.alumno_activo is not None:
             else:
                 st.info("ℹ️ No se puede guardar captura ahorita porque estás fuera del trimestre que cargaste. Cambia la fecha a una dentro del trimestre, o carga el trimestre que sí es.")
         with colg2:
-            if st.button(f"🗑️ Eliminar a {nombre_al}"):
+            if st.button(f"🗑️ Eliminar a este alumno"):
                 for i,a in enumerate(st.session_state.alumnos):
                     if a["Nombre"]==nombre_al and a["Escuela"]==escuela and a["Grupo"]==grupo_sel:
                         del st.session_state.alumnos[i]; _guardar_listas_archivo(); break
