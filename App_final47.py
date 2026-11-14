@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 54 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final54.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 55 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final55.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -256,119 +256,84 @@ def riesgo_de_alumno(nombre, escuela, grupo):
     return nivel, texto, faltas, retardos, no_trab, no_tarea, indis_n, regs
 def trimestre_terminado():
     return hoy > st.session_state.tri_fin
-def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - Que el programa lo detecte"):
-    # VERSION ROBUSTA PARA SECUNDARIA: 1B Artes + 3A/3B Electronica
-    # Si el usuario ya le dijo de que grupo es el PDF, usamos ese y no adivinamos
+def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas"):
+    # FINAL 55 REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
-    doc=fitz.open(stream=datos_pdf, filetype="pdf")
-    total=0; por_grupo={}
-    # Si el PDF si dice de que escuela es adentro, y no coincide con la que elegiste, no cargarlo
-    # FINAL 54: YA NO se lee la escuela de dentro del PDF. Solo manda la que TU eliges arriba. Asi UNIDAD ya no se va a TOMAS.
-    textos_debug=[]
-    # Si viene grupo forzado como "3A" o "1B", ese manda en todas las paginas
-    grupo_fijo=None
-    if grupo_forzado and grupo_forzado.startswith(("1","2","3","4","5","6")) and len(grupo_forzado)<=3:
-        # Ej: "3A - Electronica" -> "3A", "1B - Artes" -> "1B"
-        grupo_fijo=grupo_forzado[:2].strip().upper()
+    if grupo_forzado == "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" or not grupo_forzado:
+        return 0, {"ERROR_GRUPO": "Elige el grupo a mano arriba, no lo dejes en Auto. Asi no se mezcla."}, ["Elige el grupo a mano."]
+    grupo_fijo = grupo_forzado[:2].strip().upper()
+    doc = fitz.open(stream=datos_pdf, filetype="pdf")
+    total = 0
+    por_grupo = {}
+    textos_debug = []
     for num_pag, pagina in enumerate(doc):
-        texto_pag=pagina.get_text()
-        if num_pag<2:
+        texto_pag = pagina.get_text()
+        if num_pag < 2:
             textos_debug.append(texto_pag[:1200])
-        grupo_actual=grupo_fijo
-        if grupo_actual is None:
-            # ARREGLO UNIDAD 2A: buscar el grupo SOLO en el encabezado de la pagina (primeros 800 caracteres).
-            # Antes buscaba en TODA la hoja y agarraba el primer 1A que veia en cualquier parte, aunque la hoja fuera de 2A, y por eso te ponia los mismos de TOMAS.
-            texto_encabezado = texto_pag[:800]
-            limpio=re.sub(r"[^A-Z0-9]+", " ", texto_encabezado.upper())
-            m=re.search(r"GRADO GRUPO (\d) ([ABC])", limpio)
-            if m: grupo_actual=m.group(1)+m.group(2).upper()
-            else:
-                # Buscar "3 - A", "3-A", "3 A", "GRUPO 3A", "3A", "TERCERO A", etc.
-                cands=re.findall(r"\b([1-6])\s*[- ]\s*([ABC])\b", texto_encabezado.upper())
-                if cands: grupo_actual=cands[0][0]+cands[0][1].upper()
-                else:
-                    m2=re.search(r"GRUPO\s*([1-6])\s*([ABC])", texto_encabezado.upper())
-                    if m2: grupo_actual=m2.group(1)+m2.group(2).upper()
-                    else:
-                        m3=re.search(r"\b([1-6])([ABC])\b", texto_encabezado.upper())
-                        if m3: grupo_actual=m3.group(1)+m3.group(2).upper()
-                        else:
-                            # YA NO adivinar por el nombre del archivo
-                            pass
-        if not grupo_actual:
-            continue
-        # Leer nombres de MUCHAS formas: con numero de lista, sin numero, con apellidos primero, con CURP, etc.
-        lineas=texto_pag.split("\n")
+        grupo_actual = grupo_fijo
+        lineas = texto_pag.split("\n")
         for linea in lineas:
-            linea_original=linea.strip()
-            linea=linea_original
-            if len(linea)<5: continue
-            nombre=None
-            # Forma 1: "1  GARCIA LOPEZ JUAN" (numero + nombre)
-            m_nom=re.match(r"^[\*\s]*(\d{1,2})[\.\-\s]+([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ ]{5,})$", linea, re.I)
-            if m_nom: nombre=m_nom.group(2).strip()
+            linea_original = linea.strip()
+            linea = linea_original
+            if len(linea) < 5:
+                continue
+            nombre = None
+            m_nom = re.match(r"^[\*\s]*(\d{1,2})[\.\-\s]+([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ ]{5,})$", linea, re.I)
+            if m_nom:
+                nombre = m_nom.group(2).strip()
             else:
-                # Forma 2: "1 GARCIA LOPEZ JUAN PEREZ 123456..." (numero + nombre + numeros/CURP al final) - quitar lo del final
-                m2=re.match(r"^[\*\s]*(\d{1,2})[\.\-\s]+([A-ZÁÉÍÓÚÑ ]{5,}?)(?:\s+[A-Z0-9]{10,}|\s+\d{4,}.*)?$", linea, re.I)
-                if m2: nombre=m2.group(2).strip()
+                m2 = re.match(r"^[\*\s]*(\d{1,2})[\.\-\s]+([A-ZÁÉÍÓÚÑ ]{5,}?)(?:\s+[A-Z0-9]{10,}|\s+\d{4,}.*)?$", linea, re.I)
+                if m2:
+                    nombre = m2.group(2).strip()
                 else:
-                    # Forma 3: Solo nombre sin numero, toda la linea en mayusculas con 2 o mas palabras, sin palabras de encabezado
-                    # Ej: "GARCIA LOPEZ JUAN" o "JUAN GARCIA LOPEZ"
-                    if re.match(r"^[A-ZÁÉÍÓÚÑ ]+$", linea) and len(linea.split())>=2 and len(linea.split())<=6:
-                        mayus=linea.upper()
+                    if re.match(r"^[A-ZÁÉÍÓÚÑ ]+$", linea) and len(linea.split()) >= 2 and len(linea.split()) <= 6:
+                        mayus = linea.upper()
                         if not any(p in mayus for p in ["NOMBRE","LISTA","GRUPO","GRADO","ESCUELA","SECUNDARIA","MATERIA","EVALUACION","CALIFICACION","ASISTENCIA","TURNO","CICLO","PROFESOR","DOCENTE","FIRMA","TOTAL","PROMEDIO","ELECTRONICA","ARTES"]):
-                            nombre=linea.strip()
-            if not nombre: continue
-            # Limpiar
-            nombre=re.sub(r"\s+\d+$","",nombre).strip()
-            nombre=re.sub(r"\s\d+\s*$","",nombre).strip()
-            nombre=re.sub(r"\s+"," ",nombre).strip()
-            if len(nombre)<5: continue
-            if "NOMBRE" in nombre.upper() or "EVALUACION" in nombre.upper(): continue
-            if re.match(r"^[1-6]\s*-\s*[AB]$", nombre.strip()): continue
-            # Quitar si es solo numeros o solo una palabra
-            if len(nombre.split())<2: continue
-            materia="Artes" if (escuela!="ESCUELA SECUNDARIA ESTATAL # 3046" or grupo_actual=="1B") else "Electrónica"
-            existe=any(a["Nombre"].lower()==nombre.lower() and a["Grupo"]==grupo_actual and a["Escuela"]==escuela for a in st.session_state.alumnos)
-            if existe: continue
+                            nombre = linea.strip()
+            if not nombre:
+                continue
+            nombre = re.sub(r"\s+\d+$","",nombre).strip()
+            nombre = re.sub(r"\s\d+\s*$","",nombre).strip()
+            nombre = re.sub(r"\s+"," ",nombre).strip()
+            if len(nombre) < 5:
+                continue
+            if "NOMBRE" in nombre.upper() or "EVALUACION" in nombre.upper():
+                continue
+            if len(nombre.split()) < 2:
+                continue
+            materia = "Artes" if (escuela != "ESCUELA SECUNDARIA ESTATAL # 3046" or grupo_actual == "1B") else "Electrónica"
+            existe = any(a["Nombre"].lower()==nombre.lower() and a["Grupo"]==grupo_actual and a["Escuela"]==escuela for a in st.session_state.alumnos)
+            if existe:
+                continue
             st.session_state.alumnos.append({"Nombre":nombre,"Escuela":escuela,"Grupo":grupo_actual,"Materia":materia})
-            por_grupo[grupo_actual]=por_grupo.get(grupo_actual,0)+1; total+=1
-    # SEGUNDO PASE - Para hojas como la de 3-C donde el numero, el nombre y la letra vienen en renglones separados:
-    # 1
-    # ACOSTA ALANIS CARLOS SAID
-    # B
-    # Si en el primer pase no salio nada de una pagina, intentar este pase
-    # Lo hacemos siempre para no perder a nadie, el duplicado ya lo evita el "existe"
+            por_grupo[grupo_actual] = por_grupo.get(grupo_actual,0)+1
+            total += 1
+    # Segundo pase para hojas donde numero, nombre y letra vienen en renglones separados
     for pagina in doc:
-        texto_pag=pagina.get_text()
-        # Detectar grupo de esta pagina (ya con C)
-        grupo_pag=grupo_fijo
-        if grupo_pag is None:
-            m_pag=re.search(r"\b([1-6])\s*[- ]\s*([ABC])\b", texto_pag.upper())
-            if m_pag: grupo_pag=m_pag.group(1)+m_pag.group(2).upper()
-        if not grupo_pag: continue
-        lineas=[l.strip() for l in texto_pag.split("\n")]
-        idx=0
+        texto_pag = pagina.get_text()
+        grupo_pag = grupo_fijo
+        lineas = [l.strip() for l in texto_pag.split("\n")]
+        idx = 0
         while idx < len(lineas):
-            linea=lineas[idx]
-            # Solo numero solo: "1", "2", "10"
+            linea = lineas[idx]
             if re.match(r"^\d{1,2}$", linea):
                 if idx+1 < len(lineas):
-                    sig=lineas[idx+1].strip()
+                    sig = lineas[idx+1].strip()
                     if re.match(r"^[A-ZÁÉÍÓÚÑ ]+$", sig) and len(sig.split())>=2 and len(sig)>5 and "NOMBRE" not in sig.upper():
-                        nombre2=re.sub(r"\s+"," ",sig).strip()
-                        materia2="Artes" if (escuela!="ESCUELA SECUNDARIA ESTATAL # 3046" or grupo_pag=="1B") else "Electrónica"
-                        existe2=any(a["Nombre"].lower()==nombre2.lower() and a["Grupo"]==grupo_pag and a["Escuela"]==escuela for a in st.session_state.alumnos)
+                        nombre2 = re.sub(r"\s+"," ",sig).strip()
+                        materia2 = "Artes" if (escuela!="ESCUELA SECUNDARIA ESTATAL # 3046" or grupo_pag=="1B") else "Electrónica"
+                        existe2 = any(a["Nombre"].lower()==nombre2.lower() and a["Grupo"]==grupo_pag and a["Escuela"]==escuela for a in st.session_state.alumnos)
                         if not existe2:
                             st.session_state.alumnos.append({"Nombre":nombre2,"Escuela":escuela,"Grupo":grupo_pag,"Materia":materia2})
-                            por_grupo[grupo_pag]=por_grupo.get(grupo_pag,0)+1; total+=1
-                        # Saltar la letra A/B/C si viene despues
+                            por_grupo[grupo_pag] = por_grupo.get(grupo_pag,0)+1
+                            total += 1
                         if idx+2 < len(lineas) and re.match(r"^[ABC]$", lineas[idx+2].strip()):
-                            idx+=3
+                            idx += 3
                         else:
-                            idx+=2
+                            idx += 2
                         continue
-            idx+=1
+            idx += 1
     return total, por_grupo, textos_debug
 
 
@@ -775,7 +740,7 @@ if not modo_lista:
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 54 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 55 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -825,9 +790,9 @@ if not modo_lista:
                     st.write(f"---")
                     st.write(f"**Archivo {idx_f+1}: {f.name}**")
                     if escuela=="ESCUELA SECUNDARIA ESTATAL # 3046":
-                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - Que el programa lo detecte", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica"], key=f"grupo_pdf_{idx_f}_36")
+                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica"], key=f"grupo_pdf_{idx_f}_36")
                     else:
-                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - Que el programa lo detecte", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
+                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
                     grupos_por_archivo[f.name]=opcion
                     if opcion=="3A y 3B juntos - Electrónica":
                         st.info("ℹ️ Este PDF trae 3A y 3B juntos. El programa va a intentar separarlos por las páginas.")
@@ -835,19 +800,21 @@ if not modo_lista:
                 if st.button("✅ Cargar todos los alumnos de estos PDFs", use_container_width=True):
                     total_general=0; por_grupo_total={}
                     for f in archivos_pdf:
-                        opcion_elegida=grupos_por_archivo.get(f.name, "Auto - Que el programa lo detecte")
+                        opcion_elegida=grupos_por_archivo.get(f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
                         try:
                             # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
                             if opcion_elegida=="3A y 3B juntos - Electrónica":
-                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Auto - Que el programa lo detecte")
+                                total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
                                 if total_uno==0:
                                     # Si no detectó nada, probar forzando 3A y luego 3B por separado no funciona, así que mostrar diagnóstico
                                     st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
                             else:
                                 # Convertir "3A - Electrónica" -> "3A", "1B - Artes" -> "1B"
-                                grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Auto - Que el programa lo detecte" else opcion_elegida
+                                grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" else opcion_elegida
                                 total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, grupo_forzado)
-                            if "ERROR_ESCUELA" in por_grupo_uno:
+                            if "ERROR_GRUPO" in por_grupo_uno:
+                                st.error(f"❌ {f.name}: {por_grupo_uno['ERROR_GRUPO']}")
+                            elif "ERROR_ESCUELA" in por_grupo_uno:
                                 st.error(f"❌ {f.name}: {por_grupo_uno['ERROR_ESCUELA']} No se cargó nada, para no mezclar escuelas.")
                             total_general+=total_uno
                             for g,c in por_grupo_uno.items():
@@ -897,9 +864,9 @@ if not modo_lista:
                 st.write(f"---")
                 st.write(f"**Archivo {idx_f+1}: {f.name}**")
                 if escuela=="ESCUELA SECUNDARIA ESTATAL # 3046":
-                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - Que el programa lo detecte", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica"], key=f"grupo_pdf_{idx_f}_36")
+                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica"], key=f"grupo_pdf_{idx_f}_36")
                 else:
-                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - Que el programa lo detecte", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
+                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
                 grupos_por_archivo[f.name]=opcion
                 if opcion=="3A y 3B juntos - Electrónica":
                     st.info("ℹ️ Este PDF trae 3A y 3B juntos. El programa va a intentar separarlos por las páginas.")
@@ -907,17 +874,17 @@ if not modo_lista:
             if st.button("✅ Cargar todos los alumnos de estos PDFs", use_container_width=True):
                 total_general=0; por_grupo_total={}
                 for f in archivos_pdf:
-                    opcion_elegida=grupos_por_archivo.get(f.name, "Auto - Que el programa lo detecte")
+                    opcion_elegida=grupos_por_archivo.get(f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
                     try:
                         # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
                         if opcion_elegida=="3A y 3B juntos - Electrónica":
-                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Auto - Que el programa lo detecte")
+                            total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
                             if total_uno==0:
                                 # Si no detectó nada, probar forzando 3A y luego 3B por separado no funciona, así que mostrar diagnóstico
                                 st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
                         else:
                             # Convertir "3A - Electrónica" -> "3A", "1B - Artes" -> "1B"
-                            grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Auto - Que el programa lo detecte" else opcion_elegida
+                            grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" else opcion_elegida
                             total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, grupo_forzado)
                         total_general+=total_uno
                         for g,c in por_grupo_uno.items():
@@ -961,7 +928,7 @@ if not modo_lista:
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 54: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 55: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
