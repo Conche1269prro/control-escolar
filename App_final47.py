@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 57 - 4 MODOS - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final57.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 58 - 4 MODOS SIN CORTE - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final58.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -21,7 +21,7 @@ def fecha_corta(f):
 st.markdown("""<style>
 h1, h2, h3 { color: #FFD400 !important; }
 /* Quitar el espacio gigante de los lados en telefono */
-.block-container { padding-top: 1rem !important; padding-left: 0.8rem !important; padding-right: 0.8rem !important; max-width: 100% !important; }
+.block-container { padding-top: 3.5rem !important; padding-left: 0.8rem !important; padding-right: 0.8rem !important; max-width: 100% !important; }
 /* Botones grandes para el dedo, que quepan */
 .stButton > button { width: 100% !important; min-height: 48px !important; font-size: 16px !important; white-space: normal !important; height: auto !important; padding: 10px 12px !important; }
 .stDownloadButton > button { width: 100% !important; min-height: 48px !important; font-size: 16px !important; white-space: normal !important; height: auto !important; }
@@ -33,11 +33,11 @@ input, select, textarea { font-size: 16px !important; }
 /* ARREGLO CORTE VISUAL STUDIO: nada se sale a los lados, todo se parte y cabe */
 * { box-sizing: border-box !important; }
 html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] { overflow-x: hidden !important; max-width: 100vw !important; }
-.encabezado-wrap { display: flex; justify-content: center; margin: 0; padding: 0; width: 100% !important; overflow: hidden !important; }
+.encabezado-wrap { display: flex; justify-content: center; margin: 0; padding: 20px 0 10px 0 !important; width: 100% !important; overflow: visible !important; }
 .encabezado-box { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; width: 100% !important; max-width: 720px !important; flex-wrap: wrap !important; justify-content: center !important; text-align: center !important; }
 .encabezado-foto { flex: 0 0 auto !important; max-width: 100% !important; }
 .encabezado-foto img { height: 90px !important; max-width: 100% !important; width: auto !important; object-fit: contain; display: block; margin: auto; }
-.encabezado-titulo { font-size: clamp(20px, 5vw, 36px) !important; font-weight: 800; color: #FFD400; line-height: 1.1 !important; white-space: normal !important; word-break: break-word !important; overflow-wrap: anywhere !important; max-width: 100% !important; }
+.encabezado-titulo { font-size: clamp(20px, 5vw, 36px) !important; font-weight: 800; color: #FFD400; line-height: 1.25 !important; white-space: normal !important; word-break: break-word !important; overflow-wrap: anywhere !important; max-width: 100% !important; }
 .encabezado-docente { font-size: clamp(14px, 4vw, 22px); color: white; margin-top: 6px; white-space: normal; }
 /* SOLO EN TELEFONO (menos de 768px): todo mas chico y columnas una abajo de otra */
 @media (max-width: 768px) {
@@ -295,7 +295,7 @@ def riesgo_de_alumno(nombre, escuela, grupo):
 def trimestre_terminado():
     return hoy > st.session_state.tri_fin
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas"):
-    # FINAL 57 - 4 MODOS REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 58 - 4 MODOS SIN CORTE REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     if grupo_forzado == "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" or not grupo_forzado:
@@ -778,7 +778,7 @@ if not modo_lista:
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 57 - 4 MODOS - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 58 - 4 MODOS SIN CORTE - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -966,7 +966,7 @@ if not modo_lista:
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 57 - 4 MODOS: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 58 - 4 MODOS SIN CORTE: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
