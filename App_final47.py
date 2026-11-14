@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 52 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final52.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 54 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final54.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -263,22 +263,7 @@ def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - Qu
     doc=fitz.open(stream=datos_pdf, filetype="pdf")
     total=0; por_grupo={}
     # Si el PDF si dice de que escuela es adentro, y no coincide con la que elegiste, no cargarlo
-    _todo=""
-    try:
-        for _pp in doc:
-            _todo += " " + _pp.get_text().upper()
-    except: pass
-    _esc_pdf=None
-    if "TOMAS GAMEROS" in _todo: _esc_pdf="TOMAS GAMEROS # 2131"
-    elif "UNIDAD PROLETARIA" in _todo: _esc_pdf="UNIDAD PROLETARIA # 2294"
-    elif "SECUNDARIA" in _todo and "3046" in _todo: _esc_pdf="ESCUELA SECUNDARIA ESTATAL # 3046"
-    # YA NO bloquear por lo que dice el PDF adentro. Si tu dices que es de UNIDAD, se carga en UNIDAD.
-    # Antes si el PDF traia la palabra TOMAS en cualquier parte, lo bloqueaba o lo metia en TOMAS aunque lo subieras en UNIDAD.
-    # Ahora solo avisar, no bloquear. Tu eleccion manda.
-    if _esc_pdf and _esc_pdf!=escuela:
-        textos_debug_aviso = [f"AVISO: Este PDF dice adentro que es de {_esc_pdf}, pero tu elegiste cargarlo en {escuela}. Se va a cargar en {escuela} porque tu lo elegiste."]
-    else:
-        textos_debug_aviso = []
+    # FINAL 54: YA NO se lee la escuela de dentro del PDF. Solo manda la que TU eliges arriba. Asi UNIDAD ya no se va a TOMAS.
     textos_debug=[]
     # Si viene grupo forzado como "3A" o "1B", ese manda en todas las paginas
     grupo_fijo=None
@@ -790,7 +775,7 @@ if not modo_lista:
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 52 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 54 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -815,7 +800,7 @@ if not modo_lista:
                 archivos_pdf = [f for f in archivos_pdf if f.name not in st.session_state[f"pdfs_quitados_{escuela}"]]
                 st.write(f"Archivos que elegiste: **{len(archivos_pdf)}**")
                 # BOTON PARA DEJAR TODO EN BLANCO
-                if st.button("🗑️ Quitar todos los PDFs y dejar en blanco", key=f"btn_quitar_todos_{escuela}_52"):
+                if st.button("🗑️ Quitar todos los PDFs y dejar en blanco", key=f"btn_quitar_todos_{escuela}_53"):
                     st.session_state[f"pdfs_quitados_{escuela}"] = []
                     st.session_state[f"contador_upload_{escuela}"] = st.session_state[f"contador_upload_{escuela}"] + 1
                     st.rerun()
@@ -825,8 +810,14 @@ if not modo_lista:
                     with col_q1:
                         st.write(f"📄 {_f_q.name}")
                     with col_q2:
-                        if st.button(f"🗑️ Quitar", key=f"btn_quitar_{escuela}_{_f_q.name}_52"):
+                        if st.button(f"🗑️ Quitar este PDF y dejar en blanco", key=f"btn_quitar_{escuela}_{_f_q.name}_53"):
+                            # Quitar DE VERDAD: borrar de quitados y cambiar la llave del Upload para que quede en blanco
+                            st.session_state[f"pdfs_quitados_{escuela}"] = [_n for _n in st.session_state.get(f"pdfs_quitados_{escuela}", [])]
                             st.session_state[f"pdfs_quitados_{escuela}"].append(_f_q.name)
+                            # Si ya quitaste todos los que habia, cambiar la llave para que el Upload quede vacio
+                            _total_subidos = len([_x for _x in archivos_pdf if True])
+                            # Guardar cuantos faltan: si quitaste el ultimo, cambiar llave
+                            st.session_state[f"contador_upload_{escuela}"] = st.session_state.get(f"contador_upload_{escuela}", 0) + 1
                             st.rerun()
                 # Por cada archivo, un selector de grupo - ESTO ES LO QUE ARREGLA LO DE 3A
                 grupos_por_archivo={}
@@ -969,6 +960,22 @@ if not modo_lista:
         st.session_state.alumnos = _limp2
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
+        st.rerun()
+    # BOTON NUEVO FINAL 54: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
+    if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
+        _antes_a = len(st.session_state.alumnos)
+        _antes_r = len(st.session_state.registros)
+        # Borrar alumnos de esa escuela
+        st.session_state.alumnos = [a for a in st.session_state.alumnos if a.get("Escuela") != escuela]
+        # Borrar registros/capturas de esa escuela (si el registro tiene Escuela)
+        st.session_state.registros = [r for r in st.session_state.registros if r.get("Escuela") != escuela]
+        # Limpiar tambien los PDFs que estaban en espera de esa escuela
+        st.session_state[f"archivos_elegidos_{escuela}"] = []
+        st.session_state[f"pdfs_quitados_{escuela}"] = []
+        st.session_state[f"contador_upload_{escuela}"] = st.session_state.get(f"contador_upload_{escuela}", 0) + 1
+        _guardar_listas_archivo()
+        st.success(f"✅ Listo. Se borraron {_antes_a - len(st.session_state.alumnos)} alumnos y {_antes_r - len(st.session_state.registros)} capturas de {escuela}. Ya quedo en blanco, puedes subir otra vez su PDF bien.")
         st.rerun()
     st.subheader(f"📋 2. Elige el grupo de {escuela}")
     grupos_disponibles=sorted(set(a["Grupo"] for a in alumnos_esc))
