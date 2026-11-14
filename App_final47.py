@@ -1,6 +1,5 @@
-
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 68 - LISTAS ARRIBA, SIN NameError - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final68.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final74.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -421,6 +420,21 @@ if not st.session_state.alumnos and not st.session_state.registros:
     _al, _rg = _cargar_listas_archivo()
     if _al: st.session_state.alumnos = _al
     if _rg: st.session_state.registros = _rg
+# FINAL 69: si te sales a ver el PDF y regresas, el link ya trae en donde estabas. Asi no regresa al inicio.
+try:
+    _qp = st.query_params
+    _esc_q = _qp.get("escuela", None)
+    _gru_q = _qp.get("grupo", None)
+    _alu_q = _qp.get("alumno", None)
+    if _esc_q and not st.session_state.get("escuela_activa"):
+        st.session_state.escuela_activa = _esc_q
+    if _gru_q:
+        st.session_state.grupo_sel_actual = _gru_q
+        st.session_state.grupo_confirmado = _gru_q
+    if _alu_q:
+        st.session_state.alumno_activo = _alu_q
+except Exception:
+    pass
 # FINAL 67: cargar listas fijas leidas de tus PDFs si todavia no estan. No duplica, no borra capturas.
 for _esc_fija, _listas_fija in [(ESCUELA_UNIDAD_NOMBRE, LISTAS_FIJAS_UNIDAD), (ESCUELA_SECUNDARIA_NOMBRE, LISTAS_FIJAS_SECUNDARIA)]:
     for _g_fija, _nombres_fija in _listas_fija.items():
@@ -429,6 +443,60 @@ for _esc_fija, _listas_fija in [(ESCUELA_UNIDAD_NOMBRE, LISTAS_FIJAS_UNIDAD), (E
             if not _ex:
                 _mat_fija = "Artes" if (_esc_fija==ESCUELA_SECUNDARIA_NOMBRE and _g_fija=="1B") else ("Electrónica" if _esc_fija==ESCUELA_SECUNDARIA_NOMBRE else "Primaria")
                 st.session_state.alumnos.append({"Nombre": _n_fija, "Escuela": _esc_fija, "Grupo": _g_fija, "Materia": _mat_fija})
+
+# FINAL 70: en celular, mostrar el link donde estas para que lo copies si se te cierra la app
+try:
+    _link_actual = f"?escuela={st.session_state.get('escuela_activa','')}&grupo={st.session_state.get('grupo_sel_actual','')}&alumno={st.session_state.get('alumno_activo','')}"
+    st.caption(f"🔗 Tu lugar: {_link_actual} - Si el celular te saca, pega este link y regresas donde estabas.")
+    # Guardar en el celular mismo, no solo en el link, para que aguante WhatsApp y llamadas
+    try:
+        import streamlit.components.v1 as _comp
+        _esc_js = str(st.session_state.get("escuela_activa","")).replace('"','')
+        _gru_js = str(st.session_state.get("grupo_sel_actual","")).replace('"','')
+        _alu_js = str(st.session_state.get("alumno_activo","")).replace('"','')
+        _comp.html(f"""
+        <script>
+        try{{
+          var lugar = {{escuela: "{_esc_js}", grupo: "{_gru_js}", alumno: "{_alu_js}"}};
+          // Si ya hay escuela, guardarla en el celular
+          if (lugar.escuela) {{ localStorage.setItem("mi_lugar_control_escolar", JSON.stringify(lugar)); }}
+          // Si no hay escuela en el link pero si hay guardada, regresar ahi
+          else {{
+            var guardado = localStorage.getItem("mi_lugar_control_escolar");
+            if (guardado) {{
+              var g = JSON.parse(guardado);
+              if (g.escuela) {{
+                var u = new URL(window.location.href);
+                if (!u.searchParams.get("escuela")) {{
+                  u.searchParams.set("escuela", g.escuela);
+                  if (g.grupo) u.searchParams.set("grupo", g.grupo);
+                  if (g.alumno) u.searchParams.set("alumno", g.alumno);
+                  window.location.href = u.toString();
+                }}
+              }}
+            }}
+          }}
+        }}catch(e){{}}
+        </script>
+        """, height=0)
+    except Exception:
+        pass
+except Exception:
+    pass
+# FINAL 71: NUNCA borrar el link si la memoria esta vacia. Si el celular te cerro la app y regresas, el link es lo unico que te regresa a donde estabas.
+try:
+    _qp2 = st.query_params
+    # Si ya hay lugar en el link, no lo borres aunque la memoria este vacia. Primero se restaura arriba.
+    if st.session_state.get("escuela_activa"):
+        if st.session_state.get("escuela_activa") != _qp2.get("escuela"):
+            _qp2["escuela"] = str(st.session_state.get("escuela_activa"))
+        if st.session_state.get("grupo_sel_actual") and st.session_state.get("grupo_sel_actual") != "-- Elige un grupo --":
+            _qp2["grupo"] = str(st.session_state.get("grupo_sel_actual"))
+        if st.session_state.get("alumno_activo"):
+            _qp2["alumno"] = str(st.session_state.get("alumno_activo"))
+    # Si no hay escuela en memoria pero si en el link, no tocar nada, ya se restauro arriba.
+except Exception:
+    pass
 if "escuela_activa" not in st.session_state: st.session_state.escuela_activa=None
 if "alumno_activo" not in st.session_state: st.session_state.alumno_activo=None
 if "trimestre" not in st.session_state: st.session_state.trimestre="Trimestre 2"
@@ -541,6 +609,71 @@ def _auto_trimestre_hoy():
     return False
 # Al abrir: si hay trimestres guardados, poner el de HOY automaticamente
 _auto_trimestre_hoy()
+# ===== FINAL 72: PUNTUACION Y PESOS - TODO SUMA A LA CALIFICACION FINAL =====
+PESOS_FINAL = {"Asistencia": 5, "Trabajos": 30, "Tareas": 5, "Conducta": 10, "Practicas": 25, "Proyecto": 25}
+PUNTOS_ASISTENCIA = {"😊 Asistió": 10, "⏰ Retardo": 7, "😢 Falta": 0}
+PUNTOS_TRABAJO = {"Entrega en tiempo y forma, como se pidió": 10, "Entrega a destiempo": 6, "Entrega trabajo a medias": 5, "Hizo el trabajo solo por hacerlo": 3, "Entrega a destiempo e incompleto": 2, "Actividad no realizada": 0, "No cuenta con material": 0, "No se pidió": None, "📄✅ Entregó": 10, "📄❌ No entregó": 0, "Sin material de trabajo": 0}
+PUNTOS_TAREA = {"✉️ Entregó": 10, "✉️❌ No entregó": 0, "No se pidió": None}
+PUNTOS_CONDUCTA = {"Ninguna": 10, "Conversación durante la clase": 7, "Falta de respeto a compañero o docente": 0, "Se levantó de su lugar sin autorización": 7, "No siguió las instrucciones": 5, "Uso de dispositivos electrónicos en clase": 5, "Genera distracción en sus compañeros": 5, "Trabajos": 5, "Sin material de trabajo": 5, "Actividad no realizada": 5}
+PUNTOS_PRACTICA = {"Entrega práctica en tiempo y forma": 10, "Entrega práctica a destiempo": 6, "Entrega práctica a destiempo e incompleta": 4, "Entrega práctica a destiempo haciendo lo que quiso": 2, "No entrega práctica": 0, "No se pidió": None}
+PUNTOS_PROYECTO = {"Entrega proyecto en tiempo y forma": 10, "Entrega a destiempo": 6, "Entrega a destiempo e incompleto": 4, "Entrega a destiempo y haciendo lo que quiso": 2, "No entrega proyecto": 0, "Todavía no se pide": None, "No se pidió": None}
+LISTA_CONDUCTAS = ["Ninguna","Conversación durante la clase","Falta de respeto a compañero o docente","Se levantó de su lugar sin autorización","No siguió las instrucciones","Uso de dispositivos electrónicos en clase","Genera distracción en sus compañeros","Trabajos"]
+LISTA_TRABAJOS = ["Entrega en tiempo y forma, como se pidió","Entrega a destiempo","Entrega trabajo a medias","Hizo el trabajo solo por hacerlo","Entrega a destiempo e incompleto","Actividad no realizada","No cuenta con material","No se pidió"]
+LISTA_PRACTICAS = ["No se pidió","Entrega práctica en tiempo y forma","Entrega práctica a destiempo","Entrega práctica a destiempo e incompleta","Entrega práctica a destiempo haciendo lo que quiso","No entrega práctica"]
+LISTA_PROYECTOS = ["Todavía no se pide","Entrega proyecto en tiempo y forma","Entrega a destiempo","Entrega a destiempo e incompleto","Entrega a destiempo y haciendo lo que quiso","No entrega proyecto"]
+def _puntos(mapa, valor):
+    if valor is None: return None
+    v = str(valor).strip()
+    if v in mapa: return mapa[v]
+    return None
+def calcular_calificacion_final(nombre, escuela, grupo):
+    regs = [r for r in st.session_state.registros if r.get("Alumno")==nombre and r.get("Escuela")==escuela and r.get("Grupo")==grupo]
+    _tri = st.session_state.get("trimestre_cargado_nombre")
+    if _tri:
+        regs = [r for r in regs if r.get("Trimestre")==_tri]
+    if not regs: return None
+    def _prom(mapa, campo):
+        pts = [_puntos(mapa, r.get(campo)) for r in regs]
+        pts = [p for p in pts if p is not None]
+        if not pts: return None, 0
+        return sum(pts)/len(pts), len(pts)
+    prom_asis, n_asis = _prom(PUNTOS_ASISTENCIA, "Estado")
+    prom_trab, n_trab = _prom(PUNTOS_TRABAJO, "Trabajo")
+    prom_tar, n_tar = _prom(PUNTOS_TAREA, "Tarea")
+    # FINAL 74: reincidencia quita poquito, solo a partir de la 2da vez en lo mismo. La 1ra no quita.
+    # Excelente desempeño suma decimas extras al final, max +1.0
+    regs_ordenados = sorted(regs, key=lambda x: x.get("Fecha",""))
+    _conteo_reinc_acum = {}
+    pts_cond=[]
+    _n_excelente = 0
+    for r in regs_ordenados:
+        p = _puntos(PUNTOS_CONDUCTA, r.get("Indisciplina"))
+        if p is not None:
+            _re = r.get("Reincidencia")
+            if _re and _re!="Ninguna":
+                _conteo_reinc_acum[_re] = _conteo_reinc_acum.get(_re, 0) + 1
+                if _conteo_reinc_acum[_re] >= 2:
+                    p = max(0, p-1)
+            pts_cond.append(p)
+        _exc = r.get("Excelente")
+        if _exc and _exc!="Ninguno" and _exc!="Ninguna":
+            _n_excelente += 1
+    _decimas_extras = min(1.0, _n_excelente * 0.3)
+    prom_cond = sum(pts_cond)/len(pts_cond) if pts_cond else None
+    n_cond = len(pts_cond)
+    prom_prac, n_prac = _prom(PUNTOS_PRACTICA, "Practica")
+    prom_proy, n_proy = _prom(PUNTOS_PROYECTO, "Proyecto")
+    detalle = {"Asistencia": (prom_asis, n_asis, 5), "Trabajos": (prom_trab, n_trab, 30), "Tareas": (prom_tar, n_tar, 5), "Conducta": (prom_cond, n_cond, 10), "Practicas": (prom_prac, n_prac, 25), "Proyecto": (prom_proy, n_proy, 25)}
+    total_peso=0; total_pts=0
+    for k,(prom,n,peso) in detalle.items():
+        if prom is not None:
+            total_peso+=peso; total_pts+=(prom/10)*peso
+    if total_peso==0: return None
+    cal_base = total_pts/total_peso*10
+    cal = min(10.0, cal_base + _decimas_extras)
+    es_final = (prom_prac is not None and prom_proy is not None)
+    return {"cal": cal, "cal_base": cal_base, "decimas": _decimas_extras, "n_excelente": _n_excelente, "detalle": detalle, "total_peso": total_peso, "es_final": es_final, "n_regs": len(regs)}
+
 def calcular_riesgo(faltas, no_trab, no_tarea, indis_n):
     puntos=faltas*2 + no_trab*2 + no_tarea*1 + indis_n*1
     if faltas>=4 or no_trab>=4 or puntos>=10: return "ROJO", "REPROBADO - Hay que hablar con sus papas"
@@ -561,7 +694,7 @@ def trimestre_terminado():
 # ===== LISTAS FIJAS LEIDAS DE TUS PDFs - FINAL 67 =====
 
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - que el programa detecte solo (recomendado)"):
-    # FINAL 68 - LISTAS ARRIBA, SIN NameError REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     # FINAL 66: AUTO SI SIRVE, como antes. Auto = detectar el grupo por pagina, leyendo lo que dice el PDF (1A, 2A, 1B, 3C, etc).
@@ -1128,7 +1261,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 68 - LISTAS ARRIBA, SIN NameError - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -1328,7 +1461,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 68 - LISTAS ARRIBA, SIN NameError: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
@@ -1430,6 +1563,15 @@ if st.session_state.alumno_activo is not None:
     st.subheader("📄 Exportar esta ficha a PDF")
     try:
         pdf_ficha=generar_pdf_ficha_alumno(nombre_al, escuela, grupo_sel)
+        # Link completo para mandartelo a WhatsApp y regresar directo a esta ficha aunque el celular te cierre la app
+        try:
+            import urllib.parse as _up
+            _link_completo = "https://control-escolar-conche.streamlit.app/?" + _up.urlencode({"escuela": st.session_state.get("escuela_activa",""), "grupo": st.session_state.get("grupo_sel_actual",""), "alumno": st.session_state.get("alumno_activo","")})
+            st.code(_link_completo, language="text")
+            st.caption("👆 Copia este link y mándatelo a ti mismo por WhatsApp. Si te entra una llamada o te sales a WhatsApp y el celular te saca, pícale a ese link y te abre directo en esta ficha, no en el inicio.")
+        except Exception:
+            pass
+        st.info("📱 CELULAR: No le piques al PDF y luego a Regresar, porque el celular te saca de la app y te dice 'esta página no existe'. Pícale a Generar PDF, déjalo que se descargue, y regresa a esta pestaña con el botón de pestañas. No uses Regresar del navegador.")
         st.download_button(label=f"📄 Generar PDF de esta ficha", data=pdf_ficha, file_name=f"Ficha_{nombre_al.replace(' ','_')}_{grupo_sel}_{st.session_state.trimestre_cargado_nombre or 'Trimestre'}.pdf", mime="application/pdf", use_container_width=True)
     except Exception as e:
         st.error(f"No se pudo generar el PDF: {e}. Instala con: py -m pip install reportlab")
@@ -1473,25 +1615,33 @@ if st.session_state.alumno_activo is not None:
             puede_capturar = False
         if fecha_captura.weekday() not in dias_clase_grupo:
             st.info(f"ℹ️ Ojo: El {fecha_bonita(fecha_captura)} es {DIAS_ES[fecha_captura.weekday()]} y a {grupo_sel} le das clase los {', '.join(nombres_dias_grupo)}.")
+        st.subheader("✏️ Captura del día - Todo suma a la calificación")
         col1,col2=st.columns(2)
         with col1:
-            asistencia=st.selectbox("😊 Asistencia", ["😊 Asistió","😢 Falta","⏰ Retardo"], key="f_asis21")
-            trabajo=st.selectbox("📄 Trabajo", ["📄✅ Entregó","📄❌ No entregó","Sin material de trabajo","No se pidió"], key="f_trab21")
+            asistencia=st.selectbox("😊 Asistencia - Vale 5%", ["😊 Asistió","⏰ Retardo","😢 Falta"], key="f_asis21")
+            trabajo=st.selectbox("📄 Trabajo - Vale 30%", LISTA_TRABAJOS, key="f_trab21")
+            practica=st.selectbox("🧪 Prácticas / Trabajos especiales - Vale 25%", LISTA_PRACTICAS, key="f_prac72")
         with col2:
-            tarea=st.selectbox("✉️ Tarea", ["✉️ Entregó","✉️❌ No entregó","No se pidió"], key="f_tar21")
-            indis=st.selectbox("Conducta en clase", ["Ninguna","Conversación durante la clase","Falta de respeto a compañero o docente","Se levantó de su lugar sin autorización","No siguió las instrucciones","Sin material de trabajo","Actividad no realizada"], key="f_ind21")
+            tarea=st.selectbox("✉️ Tarea - Vale 5%", ["✉️ Entregó","✉️❌ No entregó","No se pidió"], key="f_tar21")
+            indis=st.selectbox("Conducta en clase - Vale 10%", LISTA_CONDUCTAS, key="f_ind21")
+            proyecto=st.selectbox("🏆 Proyecto final - Vale 25%", LISTA_PROYECTOS, key="f_proy72")
+        st.write("**🔁 Reincidencia conductual** - Quita poquito: la 1ra vez no quita, a partir de la 2da vez en lo mismo le quita 1 punto en Conducta. Para saber en qué falla siempre el alumno.")
+        reincidencia=st.selectbox("🔁 Reincidencia", LISTA_CONDUCTAS, key="f_reinc72")
+        st.write("**⭐ Excelente desempeño y Felicitaciones** - Suma poquito, décimas extras al final por si las necesita. Si hoy se portó excelente o lo felicitaste, márcalo aquí.")
+        excelente=st.selectbox("⭐ Excelente desempeño / Felicitaciones", ["Ninguno","Excelente desempeño en la actividad","Felicitación por buen trabajo","Felicitación por ayuda a compañeros","Excelente desempeño + Felicitación"], key="f_excel74")
+        st.caption("Si no hay práctica o proyecto hoy, déjalos en 'No se pidió / Todavía no se pide'. No cuentan hasta que los captures al final del trimestre.")
         anotacion=st.text_area("📝 Anotaciones del día", key="f_anot21", placeholder="Ej: Conversó durante la actividad, se levantó de su lugar...")
         st.write("")
         colg1,colg2=st.columns(2)
         with colg1:
             if puede_capturar:
                 if st.button(f"💾 Guardar captura"):
-                    ya_existe=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) and r.get("Estado")==asistencia and r.get("Trabajo")==trabajo and r.get("Tarea")==tarea and r.get("Indisciplina")==indis and r.get("Anotacion")==anotacion for r in st.session_state.registros)
+                    ya_existe=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) and r.get("Estado")==asistencia and r.get("Trabajo")==trabajo and r.get("Tarea")==tarea and r.get("Indisciplina")==indis and r.get("Practica")==practica and r.get("Proyecto")==proyecto and r.get("Reincidencia")==reincidencia and r.get("Excelente")==excelente and r.get("Anotacion")==anotacion for r in st.session_state.registros)
                     ya_hay_ese_dia=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) for r in st.session_state.registros)
                     if ya_existe: st.info(f"ℹ️ Ya guardaste esto mismo el {fecha_bonita(fecha_captura)}. No lo guardé otra vez para que no se duplique.")
                     elif ya_hay_ese_dia: st.info(f"ℹ️ Ya tienes una captura el {fecha_bonita(fecha_captura)} para {nombre_al}. No la guardé para que no se duplique.")
                     else:
-                        st.session_state.registros.append({"Alumno":nombre_al,"Escuela":escuela,"Grupo":grupo_sel,"Trimestre":st.session_state.trimestre_cargado_nombre,"Fecha":str(fecha_captura),"FechaBonita":fecha_bonita(fecha_captura),"Estado":asistencia,"Trabajo":trabajo,"Tarea":tarea,"Indisciplina":indis,"Anotacion":anotacion})
+                        st.session_state.registros.append({"Alumno":nombre_al,"Escuela":escuela,"Grupo":grupo_sel,"Trimestre":st.session_state.trimestre_cargado_nombre,"Fecha":str(fecha_captura),"FechaBonita":fecha_bonita(fecha_captura),"Estado":asistencia,"Trabajo":trabajo,"Tarea":tarea,"Indisciplina":indis,"Practica":practica,"Proyecto":proyecto,"Reincidencia":reincidencia,"Excelente":excelente,"Anotacion":anotacion})
                         _guardar_listas_archivo()  # Guardar captura en listas.json para no perderla
                         st.success(f"✅ Guardado para {nombre_al} - Captura del **{fecha_bonita(fecha_captura)}** - {st.session_state.trimestre_cargado_nombre}"); st.rerun()
             else:
@@ -1503,6 +1653,43 @@ if st.session_state.alumno_activo is not None:
                         del st.session_state.alumnos[i]; _guardar_listas_archivo(); break
                 st.session_state.alumno_activo=None; st.success(f"Se eliminó {nombre_al}"); st.rerun()
     st.divider()
+    # Calificacion que se va sumando
+    _calc = calcular_calificacion_final(nombre_al, escuela, grupo_sel)
+    if _calc:
+        st.subheader(f"🏆 Calificación que se va sumando: {_calc['cal']:.1f} / 10")
+        if _calc["es_final"]:
+            st.success("✅ Ya tiene Prácticas y Proyecto, esta ya es su calificación FINAL del trimestre.")
+        else:
+            st.info(f"ℹ️ Parcial - Todavía faltan Prácticas y/o Proyecto (casi siempre al final del trimestre). Se calcula con el {_calc['total_peso']}% que ya tiene capturado. Cuando captures Prácticas y Proyecto, se completa al 100%.")
+        # Control de reincidencia: en que falla siempre, sin quitar puntos
+        _regs_todos = [r for r in st.session_state.registros if r.get("Alumno")==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel]
+        _tri2 = st.session_state.get("trimestre_cargado_nombre")
+        if _tri2:
+            _regs_todos = [r for r in _regs_todos if r.get("Trimestre")==_tri2]
+        _conteo_reinc = {}
+        for _r in _regs_todos:
+            _v = _r.get("Reincidencia")
+            if _v and _v!="Ninguna":
+                _conteo_reinc[_v] = _conteo_reinc.get(_v, 0) + 1
+        if _conteo_reinc:
+            st.write("**🔁 Control de reincidencia - En qué falla siempre (quita poquito: la 1ra no quita, a partir de la 2da quita 1 punto en Conducta):**")
+            for _cond, _veces in sorted(_conteo_reinc.items(), key=lambda x: -x[1]):
+                st.write(f"- {_cond}: {_veces} veces")
+        else:
+            st.write("🔁 Reincidencia: Todavía no tiene reincidencias registradas.")
+        for _k, (_prom, _n, _peso) in _calc["detalle"].items():
+            if _prom is None:
+                st.write(f"- {_k} ({_peso}%): Todavía no se captura")
+            else:
+                st.write(f"- {_k} ({_peso}%): Promedio {_prom:.1f} / 10 en {_n} capturas → Aporta {(_prom/10)*_peso:.1f} puntos")
+        if _calc.get("decimas", 0) > 0:
+            st.write(f"⭐ Décimas extras por Excelente desempeño / Felicitaciones: +{_calc['decimas']:.1f} (tiene {_calc.get('n_excelente',0)} felicitaciones, cada una suma 0.3, máximo +1.0)")
+            st.write(f"Calificación base: {_calc.get('cal_base', _calc['cal']):.1f} + Décimas {_calc['decimas']:.1f} = **Total: {_calc['cal']:.1f}**")
+        else:
+            st.write(f"**Total: {_calc['cal']:.1f}**")
+        st.write("⭐ Excelente desempeño: si hoy lo felicitaste o tuvo excelente desempeño, márcalo en la captura. Cada uno suma 0.3 décimas, hasta +1.0 máximo, por si las necesita al final.")
+    else:
+        st.write("Todavía no tiene capturas para calcular calificación.")
     st.subheader("📋 Historial - Con el día que se guardó")
     if not regs_al: st.write("Todavía no tiene capturas.")
     else:
@@ -1512,7 +1699,13 @@ if st.session_state.alumno_activo is not None:
             if not r.get("FechaBonita") and r.get("Fecha"):
                 try: y,m,d=map(int, r["Fecha"].split("-")); fecha_mostrar=fecha_bonita(date(y,m,d))
                 except: fecha_mostrar=r["Fecha"]
-            st.write(f"**📅 Captura del {fecha_mostrar}** - {r.get('Trimestre','')} - {r['Estado']} - {r['Trabajo']} - {r['Tarea']} - {r['Indisciplina']}")
+            st.write(f"**📅 Captura del {fecha_mostrar}** - {r.get('Trimestre','')} - {r['Estado']} - Trabajo: {r['Trabajo']} - Tarea: {r['Tarea']} - Conducta: {r['Indisciplina']}")
+            _extra = []
+            if r.get("Practica") and r.get("Practica")!="No se pidió": _extra.append(f"Práctica: {r.get('Practica')}")
+            if r.get("Proyecto") and r.get("Proyecto") not in ("Todavía no se pide","No se pidió"): _extra.append(f"Proyecto: {r.get('Proyecto')}")
+            if r.get("Reincidencia") and r.get("Reincidencia")!="Ninguna": _extra.append(f"🔁 Reincidencia: {r.get('Reincidencia')}")
+            if r.get("Excelente") and r.get("Excelente")!="Ninguno": _extra.append(f"⭐ {r.get('Excelente')}")
+            if _extra: st.write(" • ".join(_extra))
             if r["Anotacion"]: st.write(f"📝 {r['Anotacion']}")
             st.write("")
             if st.button(f"🗑️ Borrar este día - {fecha_mostrar}", key=f"borrar_dia_{escuela}_{grupo_sel}_{nombre_al}_{idx_r}_{r.get('Fecha','')}_36"):
