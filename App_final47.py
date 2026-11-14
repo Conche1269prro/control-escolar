@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final65.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 67 - LISTAS YA ADENTRO, LEIDAS DE TUS PDFs - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final67.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -182,6 +182,14 @@ if not st.session_state.alumnos and not st.session_state.registros:
     _al, _rg = _cargar_listas_archivo()
     if _al: st.session_state.alumnos = _al
     if _rg: st.session_state.registros = _rg
+# FINAL 67: cargar listas fijas leidas de tus PDFs si todavia no estan. No duplica, no borra capturas.
+for _esc_fija, _listas_fija in [(ESCUELA_UNIDAD_NOMBRE, LISTAS_FIJAS_UNIDAD), (ESCUELA_SECUNDARIA_NOMBRE, LISTAS_FIJAS_SECUNDARIA)]:
+    for _g_fija, _nombres_fija in _listas_fija.items():
+        for _n_fija in _nombres_fija:
+            _ex = any(a.get("Nombre","").lower()==_n_fija.lower() and a.get("Grupo")==_g_fija and a.get("Escuela")==_esc_fija for a in st.session_state.alumnos)
+            if not _ex:
+                _mat_fija = "Artes" if (_esc_fija==ESCUELA_SECUNDARIA_NOMBRE and _g_fija=="1B") else ("Electrónica" if _esc_fija==ESCUELA_SECUNDARIA_NOMBRE else "Primaria")
+                st.session_state.alumnos.append({"Nombre": _n_fija, "Escuela": _esc_fija, "Grupo": _g_fija, "Materia": _mat_fija})
 if "escuela_activa" not in st.session_state: st.session_state.escuela_activa=None
 if "alumno_activo" not in st.session_state: st.session_state.alumno_activo=None
 if "trimestre" not in st.session_state: st.session_state.trimestre="Trimestre 2"
@@ -310,15 +318,259 @@ def riesgo_de_alumno(nombre, escuela, grupo):
     return nivel, texto, faltas, retardos, no_trab, no_tarea, indis_n, regs
 def trimestre_terminado():
     return hoy > st.session_state.tri_fin
-def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas"):
-    # FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+
+# ===== LISTAS FIJAS LEIDAS DE TUS PDFs - FINAL 67 =====
+LISTAS_FIJAS_UNIDAD = {
+"2A": [
+"AVILA GONZALEZ ESMERALDA YARITZA",
+"CHAPARRO GARFIO MIA MONCERRAT",
+"DURAN SAENZ EIMY MARELY",
+"ESCOBAR CHAVEZ JULIA MADAHI",
+"ESPINOZA CRUZ PEDRO EZEQUIEL CRUZ",
+"FABELA CORTEZ YAREL ALONSO",
+"FAVELA ESCOBEDO MADELINE ARLETH",
+"GAMBOA GONZALEZ ELISA VICTORIA",
+"GARCIA PEREZ JOEL EDUARDO",
+"HERRERA MANZANARES MARELYN ESTELA",
+"HERRERA RAMIREZ IAN SAMIR",
+"IBARRA GONZALEZ FERNANDO EMANUEL",
+"MEDELLIN PINEDA NICOLAS",
+"MENDOZA HOLGUIN JAVIER SAUL",
+"MIRANDA RIVERA SEBASTIAN",
+"MOLINA LOERA ZULEYMI VICTORIA",
+"NEVAREZ URBINA ALISON FERNANDA",
+"PALMA IBAÑEZ JAZIEL ALONSO",
+"PARRA GONZALEZ JUAN",
+"PEREZ RODRIGUEZ OSMARA ALEJANDRA",
+"QUINTANA FUENTES MEISY SAMANTHA",
+"RAMIREZ ROA IKER SANTIAGO",
+"RAMOS ESCARCEGA VALERIA",
+"REZA VALENZUELA CIELO IVONNE",
+"RUIZ VENZOR LAYLA JOSABETH",
+"SALCIDO MENCHACA IVAN CALEB",
+"SANCHEZ RAZO FERNANDA ITAI",
+"SUAREZ AGUIRRE IKER GAEL",
+"TORRES CHAPARRO DANNA VALERIA",
+"TORRES RAMOS SARA MARIANNE",
+"TRILLO SOLIS IAN PAUL",
+"VALDEZ RAMOS SANTIAGO DAMIAN",
+"VALDEZ VILLALBA IAN JARED",
+"VELOZ ACEVEDO HECTOR ABRAHAM",
+"XOLOTL MARTINEZ IHAN KALEHB",
+"ZAPATA CRUZ ERICK MATEO"
+],
+"3A": [
+"CARBAJAL VILLAR BRITHANY JAQUELIN",
+"CASTILLO GONZALEZ MAHELET SARELY",
+"CENTENO FLORES ANGEL GABRIEL",
+"CHAPARRO PEREZ GEORGINA",
+"CHAVEZ BARRERA LIA AITANA",
+"CHAVEZ JR OLIVAS JOSE",
+"DOMINGUEZ COVARRUBIAS IVON ARACELY",
+"ESPINOZA CORREDOR ANALY HATSUMI",
+"FELIX PEREZ OMAR EDUARDO",
+"FLORES DE LA CRUZ NICOL ELIZABETH",
+"GUERRA MARTINEZ SOFIA SOLEDAD",
+"HERNANDEZ MORENO MELANY JULIETT",
+"IBARRA GONZALEZ DEREK ALEJANDRO",
+"LOZANO DIAZ ERIK APOLONIO",
+"LUCERO GONZALEZ DANIEL ELI",
+"MENDOZA ENRIQUEZ AMANDA LIZETH",
+"NUÑEZ MANCINAS JOEL JERONIMO",
+"PERAZA RIVERA EINAR EZEQUIEL",
+"PORTILLO RAMOS MARLEN MICHEL",
+"SALIDO VALENZUELA JOEL ARIEL",
+"VALERIANO MORALES SHELSY YAMILETH"
+],
+"4A": [
+"AVENDAÑO CAMPOS DERECK RENE",
+"BIBIANO RODRIGUEZ MELANY ALEXA",
+"CANO TORRES YESLI TAMARA",
+"CORDOBA GARCIA LARRY YAEL",
+"CORRAL TELLEZ MIA JAZMIN",
+"DELGADO HERNANDEZ DANIEL ALEJANDRO",
+"DIAZ MEZA DILAN LEONARDO",
+"DIAZ VILLEZCAS YAEL FERNANDO",
+"DOMINGUEZ HERNANDEZ ANDREA",
+"DOMINGUEZ ORTEGA NAHOMI MARBELLA",
+"ESPINOZA GONZALEZ XIMENA SARAHI",
+"ESTEVEZ RAMIREZ HASIEL ISRAEL",
+"HERNANDEZ ACEVES JUNIOR ISAAC",
+"JAQUEZ PONCE XIMENA ADILENE",
+"JAUREGUI VELAZQUEZ GERALDINE CONSUELO",
+"JUAREZ MENDOZA JOHANA SOFIA",
+"MORENO DANIEL JAZMIN ANAHY",
+"MUÑOZ SAPIEN AIDIN SHANTAL",
+"OLIVARES LOPEZ JOSHUA ALEJANDRO",
+"OLIVAS REY YAZLIN ANDREA",
+"PEÑA GONZALEZ RODRIGO",
+"REY ESTRADA LIAM SAUL",
+"REZA VALENZUELA LUNA YOSELIN",
+"RIVERA PADILLA NATALIA NAHOMI",
+"ROA RAMOS SARA MICHELLE",
+"RODRIGUEZ CORREDOR IKER ADAIR",
+"RUBIO VALDEZ IKER AZAEL",
+"VEGA ALEMAN ABNER GABRIEL"
+],
+"4B": [
+"ANDAZOLA ROSAS DULCE YARETZI",
+"BARFFUSON VILLAGRAN IBRAHIM",
+"CARDENAS VELAZQUEZ AARON EDUARDO",
+"CHAVEZ OLIVAS ESBEYDI",
+"DOMINGUEZ ALCANTAR MIA YAMILETH",
+"DOMINGUEZ ALCANTAR RENATA ABIGAIL",
+"DOMINGUEZ COVARRUBIAS ABRIL YESENIA",
+"FIERRO MORENO SURI VALENTINA",
+"GALLEGOS CASTRO JASIEL ALEXIS",
+"GARCIA PARRA GABRIEL JACOB",
+"GARCIA ZAMARRON HEBER MIGUEL",
+"GONZALEZ MONTES ARIANA YAMILETH",
+"GRADO AVILA SEBASTIAN",
+"HERNANDEZ DE LA TORRE PRISCILA NATALIA",
+"HERRERA RAMIREZ ANGEL SEBASTIAN",
+"MACIAS MORENO REBECA VICTORIA",
+"MEDINA LOPEZ DRAKE SANTIAGO",
+"MONGE ESCARCEGA ALONDRA ESTEFANIA",
+"PAYAN PIZARRO ARIANA MARELY",
+"PEREYRA TAPIA EIMI VICTORIA",
+"PORTILLO FLORES PAUL ISAIR",
+"QUIROZ PORTILLO CARLOS ALBERTO",
+"RAMIREZ ROA AILEN ALEJANDRA",
+"REYES LOPEZ THIAGO ISMAEL",
+"ROSAS LOPEZ RICARDO ELIAN",
+"SALAZAR GONZALEZ MELANNIE AYTHANA",
+"SIDAS OLIVAS VICTORIA LILIANA",
+"TORRES RAMOS EDDY SEBASTIAN",
+"VIOLETA DEL ANGEL JESUS ABRAHAM"
+],
+"5A": [
+"AGUIRRE VEGA AIMEE FERNANDA",
+"ALARCON ALVIDREZ ELIAN OBED",
+"ALMAZAN SOSA ARLETH ELIZABETH",
+"ARMENDARIZ RODRIGUEZ BYRON CALEB",
+"AVILA VILLEZCAS EILEEN YUSEL",
+"BALTAZAR SOLANO NATHAN LIAM",
+"BARRIOS CISNEROS AYLIN DAYANA",
+"BECERRIL CAMARILLO SCARLETT ADRIANA",
+"BUSTILLOS VELAZQUEZ DARIEL DAVID",
+"CAZARES CHAVEZ SAID ALEJANDRO",
+"DE AVILA FLORES MARIO DANIEL",
+"DOMINGUEZ ORTEGA FREDY ALEXIS",
+"ESPINOZA GARCIA ADAM ALBERTO",
+"FLORES POLITO ZAYRA VICTORIA",
+"GOMEZ ALBINEDA YARETZI ARIANA",
+"GONZALEZ OLIVAS ELIAN ALEJANDRO",
+"GRANADOS MURILLO BRYANA LIZETH",
+"GUEVARA VELASCO GABRIELA CAMILA",
+"HERNANDEZ GONZALEZ IKER DANIEL",
+"HERNANDEZ RAMIREZ ANGELA YAMILETH",
+"LOPEZ ORTEGA VICTOR ALONSO",
+"MEDINA BIBIANO DANNA FERNANDA",
+"RIVERA GARCIA ANEL FERNANDA",
+"RUIZ ANGULO ADILENE MELANIE",
+"SAENZ RIVERA IVANNA SAMAI",
+"SANCHEZ GONZALEZ YATZIRI VICTORIA",
+"SANCHEZ GONZALEZ YURITZI ROMINA",
+"SILVA PEREZ AXEL JOEL",
+"SMITH LOYA RAMON ALEXIS"
+],
+"5B": [
+"ARENIVAS SANCHEZ ROBERTO ANTONIO",
+"BAILON VILLARREAL AXEL JULIAN",
+"CARAVEO MENDOZA REICHEL ALEJANDRA",
+"CHACON SINALOA AXEL LEONARDO",
+"CORDOBA GARCIA ASHLEY NAOMI",
+"ESPINOZA DURAN DANIEL ALEJANDRO",
+"FRANCO LORIA VALERIA VANESSA",
+"GARCIA MARQUEZ LUIS ANGEL",
+"GARCIA TREVIZO ALISON MAILEN",
+"GONZALEZ LOZOYA ALEXA DAYANA",
+"JUAREZ ESPARZA REGINA GABRIELA",
+"LARA PERAZA JONATHAN EFREN",
+"MANINI FRANCO DANNA ISABELLE",
+"MENDOZA FLORES JOSE MAURICIO",
+"MORALES PANTALEON ARACELI",
+"NAVARRO SUBIAS DANNA SOFIA",
+"OLIVAS PIÑON ESTEBAN",
+"PAREDES ROMERO ELIAN SAID",
+"PEREYRA TAPIA EVAN JAVIER",
+"PONCE DE LEON PRIETO OSIRIS RAMON",
+"RAMIREZ TRINIDAD SIDNEY JAEN",
+"RESENDIZ JUAREZ AYLEEN SOFIA",
+"RIVAS DOMINGUEZ BLANCA MARBELLA",
+"RIVERA PADILLA AZUL AITANA",
+"RODRIGUEZ RODRIGUEZ LUISA IVANNA",
+"RODRIGUEZ VALENZUELA GERSON SANTIAGO",
+"SINALOA GONZALEZ DELIA MALENY",
+"VARGAS GUTIERREZ ASHLEY NICOLE",
+"WALKER GENESIS ALEXA"
+]
+}
+LISTAS_FIJAS_SECUNDARIA = {
+"1B": [
+"AGUIRRE IBARRA ZOE VICTORIA",
+"AGUIRRE RAMOS CESAR OMAR",
+"ALMARAZ PAREDES ISAIAS",
+"CASTRUITA DE LA CRUZ ANGEL ALBERTO",
+"CHAPARRO LERMA GENESIS SARAI",
+"CONTRERAS GARCIA DANIELA ARIKO",
+"COSS TALAMANTES CARLOS DAMIAN",
+"DE SANTIAGO AGUILERA SAID ADRIAN",
+"DURAN VILLALBA DILANY AMERICA",
+"ENRIQUEZ ROMERO LAURA SOFIA",
+"GONZALEZ VILLA NATHAN LEHINAD",
+"ISLAS SAENZ GENESIS ANDREA",
+"LEDEZMA CARRILLO DANNA YAMILETH",
+"LOPEZ JAVIER XIMENA VALERIA",
+"MARQUEZ ANCHONDO ANGELICA ALEXA",
+"MARTINEZ BAYRRUZ MANUEL ALEJANDRO",
+"MARTINEZ FERNANDEZ ELISA",
+"MENDOZA SILVAS LEIA SOPHIA",
+"NUÑEZ LARA FATIMA VIANEY",
+"PEREZ GARCIA IKER SANTIAGO",
+"PINEDA CHAVEZ ANGEL SAID",
+"RAMIREZ DOMINGUEZ ALESSANDRA GUADALUPE",
+"ROBLES LOZANO AARON ALEXANDER",
+"RODRIGUEZ MONTIEL ALAN GERARDO",
+"SALINAS DURAN JOSELYN ITZAYANA",
+"SANCHEZ AGUILAR DIANA FERNANDA",
+"TREVIZO ACOSTA MARLEY CELESTE",
+"VILLALOBOS MORALES XIMENA",
+"YAÑEZ DELGADO DERIAN ALEXIS"
+],
+"3C": [
+"ACOSTA ALANIS CARLOS SAID",
+"BOLAÑOS ROBLEDO LEONARDO DANIEL",
+"CARDENAS FLORES BRAYAN JESUS",
+"CASTRUITA DE LA CRUZ AXEL RENE",
+"ESCARCEGA ROMAN LUIS ANGEL",
+"ESPITIA CLETO HUGO",
+"GARCIA LOPEZ ANGEL TADEO",
+"MUÑOZ BALLESTEROS IVAN PAOLO",
+"PEREZ RONQUILLO KATHERINE SOFIA",
+"QUINTANA MARTHA ANGEL ADRIAN",
+"RENTERIA TENA ANGEL SANTIAGO",
+"ROMERO PORTILLO BRANDON TADEO",
+"ROSALES MASCORRO SANTIAGO"
+]
+}
+ESCUELA_UNIDAD_NOMBRE = "UNIDAD PROLETARIA # 2294"
+ESCUELA_SECUNDARIA_NOMBRE = "ESCUELA SECUNDARIA ESTATAL # 3046"
+
+def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - que el programa detecte solo (recomendado)"):
+    # FINAL 67 - LISTAS YA ADENTRO, LEIDAS DE TUS PDFs REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
-    # FINAL 65: si es MIXTO (1B y 3C juntos, o 3A y 3B juntos), no es error. Se detecta por pagina.
+    # FINAL 66: AUTO SI SIRVE, como antes. Auto = detectar el grupo por pagina, leyendo lo que dice el PDF (1A, 2A, 1B, 3C, etc).
+    # Solo es error si no viene nada. Auto ya no es error.
+    es_auto = (grupo_forzado in ("Auto - que el programa detecte solo (recomendado)", "Auto - que el programa detecte solo (recomendado)", "Auto", None, "")) or (isinstance(grupo_forzado, str) and grupo_forzado.strip()=="")
     es_mixto = isinstance(grupo_forzado, str) and grupo_forzado.startswith("MIXTO_")
-    if grupo_forzado == "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" or not grupo_forzado:
-        return 0, {"ERROR_GRUPO": "Elige el grupo a mano arriba, no lo dejes en Auto. Asi no se mezcla."}, ["Elige el grupo a mano."]
-    if es_mixto:
+    if not grupo_forzado and not es_auto:
+        return 0, {"ERROR_GRUPO": "El programa detecta el grupo solo. Si sale mal, elige el grupo a mano."}, ["Elige el grupo a mano."]
+    if es_auto:
+        grupo_fijo = None
+        grupos_mixto = []
+    elif es_mixto:
         # MIXTO_1B_3C -> grupos = ["1B","3C"]
         _partes = grupo_forzado.replace("MIXTO_","").split("_")
         grupos_mixto = _partes
@@ -334,6 +586,36 @@ def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el 
         if num_pag < 2:
             textos_debug.append(texto_pag[:1200])
         grupo_actual = grupo_fijo
+        if es_auto:
+            # Detectar grupo de ESTA pagina, como antes: buscar "GRUPO 2A", "GRUPO: 2A", "1 - A", "1A", "2A", etc. en las primeras lineas.
+            _txt = texto_pag.upper()
+            _det = None
+            # Buscar "GRUPO 1A", "GRUPO: 1A", "GRUPO 1 - A", etc.
+            _m = re.search(r"GRUPO\s*[:\-]?\s*([1-6])\s*[-\s]*([A-C])", _txt)
+            if not _m:
+                _m = re.search(r"(?:GRADO/GRUPO|GRUPO/SECCI[OÓ]N|GRUPO)\s*[:\-]?\s*([1-6])\s*-\s*([A-C])", _txt)
+            if not _m:
+                for _linea_head in texto_pag.split("\n")[:12]:
+                    _mh = re.match(r"\s*([1-6])\s*-\s*([A-C])\s*$", _linea_head.strip())
+                    if _mh:
+                        _m = _mh; break
+            if _m:
+                _det = _m.group(1) + _m.group(2)
+            else:
+                # Buscar "1A", "2A", "1B", "3C" solito en el encabezado (primeras 15 lineas)
+                _head = "\n".join(texto_pag.split("\n")[:15]).upper()
+                for _g in ["1A","2A","3A","4A","5A","5B","6A","1B","3B","3C","1C","2B","2C"]:
+                    if re.search(r"(?<![A-Z0-9])" + _g + r"(?![A-Z0-9])", _head):
+                        _det = _g; break
+            if _det:
+                grupo_actual = _det
+                grupo_fijo = _det  # Para las paginas que no traen grupo, usar el ultimo que si traia
+            elif grupo_fijo:
+                grupo_actual = grupo_fijo
+            else:
+                grupo_actual = "SIN_GRUPO"
+                # Si no detecto grupo en esta pagina, saltarla (no cargarla en un solo grupo a lo menso)
+                continue
         if es_mixto:
             # Buscar en la pagina cual grupo dice: "1B", "3C", "3A", "3B". El que aparezca mas, ese es el grupo de esa pagina.
             _txt_up = texto_pag.upper()
@@ -383,7 +665,17 @@ def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el 
     # Segundo pase para hojas donde numero, nombre y letra vienen en renglones separados
     for pagina in doc:
         texto_pag = pagina.get_text()
-        grupo_pag = grupo_fijo
+        grupo_pag = grupo_fijo if grupo_fijo else "SIN_GRUPO"
+        if es_auto:
+            # En el segundo pase, usar el grupo que ya se detecto en el primer pase para esta pagina, si no, buscarlo otra vez
+            _txt2 = texto_pag.upper()
+            _m2 = re.search(r"GRUPO\s*[:\-]?\s*([1-6])\s*[-\s]*([A-C])", _txt2)
+            if _m2:
+                grupo_pag = _m2.group(1) + _m2.group(2)
+            elif grupo_fijo:
+                grupo_pag = grupo_fijo
+            else:
+                continue
         if es_mixto:
             _txt_up2 = texto_pag.upper(); _mejor2 = grupo_fijo; _mejor_n2 = 0
             for _g in grupos_mixto:
@@ -751,7 +1043,7 @@ if st.session_state.escuela_activa is None:
     if st.button("🏫 Unidad Proletaria # 2294  •  Primaria  •  Artes", use_container_width=True):
         st.session_state.escuela_activa="UNIDAD PROLETARIA # 2294"; st.session_state.grupo_sel_actual="-- Elige un grupo --"; st.session_state.grupo_confirmado=None; st.session_state.alumno_activo=None; st.rerun()
     st.write("")
-    if st.button("🏫 Escuela Secundaria Estatal # 3046  •  Secundaria  •  1B Artes / 3A y 3B Electrónica", use_container_width=True):
+    if st.button("🏫 Escuela Secundaria Estatal # 3046  •  Secundaria  •  1B Artes / 3C Electrónica", use_container_width=True):
         st.session_state.escuela_activa="ESCUELA SECUNDARIA ESTATAL # 3046"; st.session_state.grupo_sel_actual="-- Elige un grupo --"; st.session_state.grupo_confirmado=None; st.session_state.alumno_activo=None; st.rerun()
     st.stop()
 
@@ -833,7 +1125,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 67 - LISTAS YA ADENTRO, LEIDAS DE TUS PDFs - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -884,9 +1176,9 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"---")
                     st.write(f"**Archivo {idx_f+1}: {f.name}**")
                     if escuela=="ESCUELA SECUNDARIA ESTATAL # 3046":
-                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"], key=f"grupo_pdf_{idx_f}_36")
+                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - que el programa detecte solo (recomendado)", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"], key=f"grupo_pdf_{idx_f}_36")
                     else:
-                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
+                        opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - que el programa detecte solo (recomendado)", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
                     grupos_por_archivo[f.name]=opcion
                     if opcion=="3A y 3B juntos - Electrónica":
                         st.info("ℹ️ Este PDF trae 3A y 3B juntos. El programa va a intentar separarlos por las páginas.")
@@ -894,7 +1186,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                 if st.button("✅ Cargar todos los alumnos de estos PDFs", use_container_width=True):
                     total_general=0; por_grupo_total={}
                     for f in archivos_pdf:
-                        opcion_elegida=grupos_por_archivo.get(f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
+                        opcion_elegida=grupos_por_archivo.get(f.name, "Auto - que el programa detecte solo (recomendado)")
                         try:
                             # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
                             if opcion_elegida in ("3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"):
@@ -905,7 +1197,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                                     st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
                             else:
                                 # Convertir "3A - Electrónica" -> "3A", "1B - Artes" -> "1B"
-                                grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" else opcion_elegida
+                                grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Auto - que el programa detecte solo (recomendado)" else opcion_elegida
                                 total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, grupo_forzado)
                             if "ERROR_GRUPO" in por_grupo_uno:
                                 st.error(f"❌ {f.name}: {por_grupo_uno['ERROR_GRUPO']}")
@@ -962,9 +1254,9 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                 st.write(f"---")
                 st.write(f"**Archivo {idx_f+1}: {f.name}**")
                 if escuela=="ESCUELA SECUNDARIA ESTATAL # 3046":
-                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"], key=f"grupo_pdf_{idx_f}_36")
+                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - que el programa detecte solo (recomendado)", "1B - Artes", "3A - Electrónica", "3B - Electrónica", "3C - Electrónica", "3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"], key=f"grupo_pdf_{idx_f}_36")
                 else:
-                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
+                    opcion=st.selectbox(f"¿De qué grupo es este archivo {f.name}?", ["Auto - que el programa detecte solo (recomendado)", "1A", "2A", "3A", "4A", "5A", "5B", "6A", "1B", "3B"], key=f"grupo_pdf_{idx_f}_36")
                 grupos_por_archivo[f.name]=opcion
                 if opcion=="3A y 3B juntos - Electrónica":
                     st.info("ℹ️ Este PDF trae 3A y 3B juntos. El programa va a intentar separarlos por las páginas.")
@@ -972,7 +1264,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
             if st.button("✅ Cargar todos los alumnos de estos PDFs", use_container_width=True):
                 total_general=0; por_grupo_total={}
                 for f in archivos_pdf:
-                    opcion_elegida=grupos_por_archivo.get(f.name, "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas")
+                    opcion_elegida=grupos_por_archivo.get(f.name, "Auto - que el programa detecte solo (recomendado)")
                     try:
                         # Si eligió "3A y 3B juntos", primero intentar como Auto (que detecta por página), si sale 0, intentar como 3A
                         if opcion_elegida in ("3A y 3B juntos - Electrónica", "1B y 3C juntos - Secundaria"):
@@ -983,7 +1275,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                                 st.warning(f"⚠️ En {f.name} no detecté grupo en automático. Abajo te muestro lo que sí leyó para que veamos cómo viene.")
                         else:
                             # Convertir "3A - Electrónica" -> "3A", "1B - Artes" -> "1B"
-                            grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" else opcion_elegida
+                            grupo_forzado = opcion_elegida[:2] if opcion_elegida!="Auto - que el programa detecte solo (recomendado)" else opcion_elegida
                             total_uno, por_grupo_uno, debug = procesar_un_pdf(f.getvalue(), escuela_pdf, f.name, grupo_forzado)
                         # FINAL 64 ARREGLO int+str: si no elegiste grupo, por_grupo_uno trae ERROR_GRUPO con texto, no numeros. No sumar, solo avisar.
                         if "ERROR_GRUPO" in por_grupo_uno:
@@ -1033,7 +1325,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 65 - SECUNDARIA 1B Y 3C JUNTOS: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 67 - LISTAS YA ADENTRO, LEIDAS DE TUS PDFs: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
