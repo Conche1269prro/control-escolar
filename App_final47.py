@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 55 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final55.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 57 - 4 MODOS - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final57.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -30,10 +30,14 @@ input, select, textarea { font-size: 16px !important; }
 /* Tablas con scroll a los lados, no aplastadas */
 [data-testid="stDataFrame"], [data-testid="stTable"] { overflow-x: auto !important; }
 /* Encabezado: foto + titulo */
-.encabezado-wrap { display: flex; justify-content: center; margin: 0; padding: 0; }
-.encabezado-box { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; width: fit-content; max-width: 100%; }
-.encabezado-foto img { height: 120px !important; width: auto !important; object-fit: contain; display: block; }
-.encabezado-titulo { font-size: clamp(22px, 6vw, 44px); font-weight: 800; color: #FFD400; line-height: 1.05; white-space: normal; }
+/* ARREGLO CORTE VISUAL STUDIO: nada se sale a los lados, todo se parte y cabe */
+* { box-sizing: border-box !important; }
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] { overflow-x: hidden !important; max-width: 100vw !important; }
+.encabezado-wrap { display: flex; justify-content: center; margin: 0; padding: 0; width: 100% !important; overflow: hidden !important; }
+.encabezado-box { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; width: 100% !important; max-width: 720px !important; flex-wrap: wrap !important; justify-content: center !important; text-align: center !important; }
+.encabezado-foto { flex: 0 0 auto !important; max-width: 100% !important; }
+.encabezado-foto img { height: 90px !important; max-width: 100% !important; width: auto !important; object-fit: contain; display: block; margin: auto; }
+.encabezado-titulo { font-size: clamp(20px, 5vw, 36px) !important; font-weight: 800; color: #FFD400; line-height: 1.1 !important; white-space: normal !important; word-break: break-word !important; overflow-wrap: anywhere !important; max-width: 100% !important; }
 .encabezado-docente { font-size: clamp(14px, 4vw, 22px); color: white; margin-top: 6px; white-space: normal; }
 /* SOLO EN TELEFONO (menos de 768px): todo mas chico y columnas una abajo de otra */
 @media (max-width: 768px) {
@@ -48,6 +52,40 @@ input, select, textarea { font-size: 16px !important; }
   .encabezado-box { flex-wrap: wrap; justify-content: center; text-align: center; }
   .encabezado-foto img { height: 90px !important; }
   .encabezado-titulo, .encabezado-docente { text-align: center; }
+}
+
+/* ===== 4 MODOS EN 1 SOLO CODIGO - FINAL 57 ===== */
+/* CELULAR: hasta 600px - letra chica, 1 columna, botones grandes para el dedo */
+@media (max-width: 600px) {
+  .encabezado-foto img { height: 70px !important; }
+  .encabezado-titulo { font-size: 22px !important; }
+  .stButton > button { min-height: 52px !important; font-size: 17px !important; }
+  [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
+  [data-testid="stHorizontalBlock"] > div { flex: 1 1 100% !important; }
+}
+/* TABLET: 601 a 1024px - mediano, 2 columnas */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .block-container { max-width: 900px !important; }
+  .encabezado-foto img { height: 110px !important; }
+  .encabezado-titulo { font-size: 32px !important; }
+  .stButton > button { font-size: 17px !important; min-height: 50px !important; }
+}
+/* LAPTOP: 1025 a 1920px - normal, como siempre */
+@media (min-width: 1025px) and (max-width: 1920px) {
+  .block-container { max-width: 1100px !important; }
+  .encabezado-foto img { height: 130px !important; }
+  .encabezado-titulo { font-size: 38px !important; }
+}
+/* TV / PANTALLA GRANDE: mas de 1921px - todo gigante para que se vea de lejos */
+@media (min-width: 1921px) {
+  .block-container { max-width: 1600px !important; }
+  .encabezado-foto img { height: 180px !important; }
+  .encabezado-titulo { font-size: 56px !important; }
+  .encabezado-docente { font-size: 32px !important; }
+  h1 { font-size: 48px !important; } h2 { font-size: 40px !important; } h3 { font-size: 32px !important; }
+  p, li, div, .stButton > button { font-size: 24px !important; }
+  .stButton > button { min-height: 70px !important; padding: 18px !important; }
+  input, select, textarea { font-size: 22px !important; }
 }
 </style>""", unsafe_allow_html=True)
 
@@ -82,7 +120,7 @@ def mostrar_encabezado():
 <div class="encabezado-wrap">
   <div class="encabezado-box">
     <div class="encabezado-foto" style="flex:0 0 auto;line-height:0;">{img}</div>
-    <div style="flex:0 1 auto;text-align:left;line-height:1.1;">
+    <div style="flex:1 1 220px;min-width:0;text-align:center;line-height:1.1;">
       <div class="encabezado-titulo">⭐ Mis Trabajos y Calificaciones</div>
       <div class="encabezado-docente">Docente: Mario Alberto Diaz Becerra</div>
     </div>
@@ -91,8 +129,8 @@ def mostrar_encabezado():
 """
         st.markdown(html, unsafe_allow_html=True)
     except:
-        st.markdown("<h1 style='text-align:center;font-size:44px;'>⭐ Mis Trabajos y Calificaciones</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center;font-size:22px;'>Docente: Mario Alberto Diaz Becerra</p>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align:center;font-size:clamp(22px,6vw,36px);word-break:break-word;'>⭐ Mis Trabajos y Calificaciones</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center;font-size:clamp(14px,4vw,20px);word-break:break-word;'>Docente: Mario Alberto Diaz Becerra</p>", unsafe_allow_html=True)
 
 # ===== LISTAS EN ARCHIVO listas.json - para no volver a subir los PDFs a cada rato =====
 # Antes alumnos y capturas solo vivian en la memoria. Si cerrabas el programa, se borraban y tenias que volver a subir los PDFs.
@@ -257,7 +295,7 @@ def riesgo_de_alumno(nombre, escuela, grupo):
 def trimestre_terminado():
     return hoy > st.session_state.tri_fin
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas"):
-    # FINAL 55 REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 57 - 4 MODOS REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     if grupo_forzado == "Elige el grupo a mano - Auto ya no sirve, mezcla las escuelas" or not grupo_forzado:
@@ -740,7 +778,7 @@ if not modo_lista:
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 55 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 57 - 4 MODOS - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -928,7 +966,7 @@ if not modo_lista:
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 55: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 57 - 4 MODOS: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
