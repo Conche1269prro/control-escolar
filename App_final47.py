@@ -1,6 +1,6 @@
 
 # MIS TRABAJOS Y CALIFICACIONES - FINAL 102 - GOOGLE SHEET POR APPS SCRIPT WEBHOOK, RECONSTRUIDA DESDE 99, SIN ERROR NAMEERROR - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final110.py
+# Corre con: py -m streamlit run app_final112.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -35,7 +35,7 @@ def _gsheets_webhook_url():
     except:
         return ""
 def _cargar_desde_gsheets():
-    # FINAL 110: Al abrir la app, leer del Sheet para no perder capturas si se reinicia el celular
+    # FINAL 112: Al abrir la app, leer del Sheet para no perder capturas si se reinicia el celular
     try:
         _url = _gsheets_webhook_url()
         if not _url:
@@ -59,7 +59,7 @@ def _guardar_en_gsheets():
             return False, "Falta webhook_url en Secrets - pon el enlace de tu Apps Script"
         import requests
         _regs = list(st.session_state.get("registros", []))
-        # FINAL 110: Antes de guardar, leer lo que ya hay en el Sheet y juntarlo con lo nuevo.
+        # FINAL 112: Antes de guardar, leer lo que ya hay en el Sheet y juntarlo con lo nuevo.
         # Si no, cuando guardas a otro alumno, el anterior se borra porque solo manda el nuevo.
         try:
             _r_get = requests.get(_url, timeout=5)
@@ -67,15 +67,27 @@ def _guardar_en_gsheets():
                 try:
                     _exist = _r_get.json().get("registros", [])
                 except:
-                    # FINAL 110: Si el Apps Script es viejo y no regresa JSON con registros, NO sobrescribir el Sheet con solo lo nuevo porque borraria al anterior.
+                    # FINAL 112: Si el Apps Script es viejo y no regresa JSON con registros, NO sobrescribir el Sheet con solo lo nuevo porque borraria al anterior.
                     return False, "Tu Apps Script es viejo - actualizalo al FINAL 106 para que no borre al anterior. No se guardo para no borrar nada." 
-                _claves = set()
-                _merged = []
+                # FINAL 112: Normalizar Fecha a YYYY-MM-DD aunque venga en 3 formatos: "2026-11-17", "2026-11-17 00:00:00", "17/11/2026" o "martes 17 de noviembre". Si no, se duplica todo.
+                def _norm_fecha(_v):
+                    _s = str(_v or "").strip()
+                    # Si viene como 17/11/2026, voltearlo a 2026-11-17
+                    if "/" in _s and len(_s) >= 10:
+                        _partes = _s[:10].split("/")
+                        if len(_partes) == 3 and len(_partes[2]) == 4:
+                            return f"{_partes[2]}-{_partes[1].zfill(2)}-{_partes[0].zfill(2)}"
+                    return _s[:10]
+                # FINAL 112: Si capturas a uno y se duplican todos, es porque la clave usaba solo Fecha. Ahora usa FechaBonita tambien, que es mas estable.
+                # Si FechaBonita es igual, es el mismo dia aunque Fecha venga diferente.
+                _por_clave = {}
                 for _r0 in _exist + _regs:
-                    _k = (str(_r0.get("Alumno","")), str(_r0.get("Escuela","")), str(_r0.get("Grupo","")), str(_r0.get("Fecha","")))
-                    if _k not in _claves:
-                        _claves.add(_k)
-                        _merged.append(_r0)
+                    _fb = str(_r0.get("FechaBonita","") or "").strip()
+                    # Si hay FechaBonita, usarla como clave principal porque no cambia de formato. Si no, usar Fecha normalizada.
+                    _clave_fecha = _fb if _fb else _norm_fecha(_r0.get("Fecha",""))
+                    _k = (str(_r0.get("Alumno","")).strip().lower(), str(_r0.get("Escuela","")).strip().lower(), str(_r0.get("Grupo","")).strip().lower(), _clave_fecha)
+                    _por_clave[_k] = _r0  # el ultimo gana = lo de la app
+                _merged = list(_por_clave.values())
                 # Si el usuario borro a proposito, no revivir lo borrado en ESTE guardado, pero limpiar el flag para que el siguiente guardado si junte al anterior
                 if st.session_state.get("_sheet_borrado_a_proposito", False):
                     _regs = _regs
@@ -85,7 +97,7 @@ def _guardar_en_gsheets():
                     st.session_state.registros = _regs
         except:
             pass
-        # FINAL 110: Si registros esta vacio y nunca se cargo del Sheet en esta sesion, NO mandar [] porque borraria el Sheet al reiniciar.
+        # FINAL 112: Si registros esta vacio y nunca se cargo del Sheet en esta sesion, NO mandar [] porque borraria el Sheet al reiniciar.
         if not _regs and not st.session_state.get("_sheet_borrado_a_proposito", False) and not st.session_state.get("_sheet_cargado", False) and not st.session_state.get("_hubo_captura_esta_sesion", False):
             return False, "No se mando vacio para no borrar el Sheet al reiniciar - primero carga del Sheet"
         _r = requests.post(_url, json={"registros": _regs}, timeout=5)
@@ -664,7 +676,7 @@ def mostrar_encabezado():
 # Ya no se escribe ni se lee ningun .json de la nube.
 def _guardar_listas_archivo():
     # Ya no escribe listas.json. Solo queda en memoria. Para guardar de verdad, usa Descargar Respaldo.
-    # FINAL 110: Cada que se guarda o se borra algo, se manda solo al Google Sheet, para que no se quede el borrado en el Sheet
+    # FINAL 112: Cada que se guarda o se borra algo, se manda solo al Google Sheet, para que no se quede el borrado en el Sheet
     try:
         if st.session_state.get("registros"):
             st.session_state._hubo_captura_esta_sesion = True
@@ -873,7 +885,7 @@ def calcular_calificacion_final(nombre, escuela, grupo):
     if not regs: return None
     _metas_g = st.session_state.get("metas_trimestre", {}).get(f"{escuela}|{grupo}", {})
     def _prom(mapa, campo, meta_key=None):
-        # FINAL 110: Solo contar lo que SI se evaluo ese dia. Si ese dia no se puso Practica/Proyecto/Tarea, no cuenta, no baja la calificacion.
+        # FINAL 112: Solo contar lo que SI se evaluo ese dia. Si ese dia no se puso Practica/Proyecto/Tarea, no cuenta, no baja la calificacion.
         # Valores que significan "no se evaluo ese dia" no son 0, son None.
         _NO_EVALUADO = {"", None, "Sin práctica", "Sin practica", "Sin proyecto", "Sin tarea", "Sin trabajo", "No aplica", "No se evaluó", "No se evaluo", "Ninguno", "Ninguna", "Sin examen", "Sin asistencia", "-"}
         pts = []
@@ -942,7 +954,7 @@ def calcular_calificacion_final(nombre, escuela, grupo):
     _net_decimas_conducta = _decimas_ganadas - _decimas_quitadas
     _decimas_extras = 0.0
     if pts_cond:
-        # FINAL 110: Conducta = 10 - quitadas + ganadas, no solo neta. Si no se porto mal y tiene 1 felicitacion, es 10, no 1.
+        # FINAL 112: Conducta = 10 - quitadas + ganadas, no solo neta. Si no se porto mal y tiene 1 felicitacion, es 10, no 1.
         # Ejemplo: 0 quitadas + 1 ganada = 10. 1 quitada + 0 ganadas = 9. 10 quitadas = 0.
         prom_cond = max(0.0, min(10.0, 10.0 - float(_decimas_quitadas) + float(_decimas_ganadas)))
         _aporte_conducta = 0.0
