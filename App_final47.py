@@ -1,6 +1,6 @@
 
 # MIS TRABAJOS Y CALIFICACIONES - FINAL 102 - GOOGLE SHEET POR APPS SCRIPT WEBHOOK, RECONSTRUIDA DESDE 99, SIN ERROR NAMEERROR - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final108.py
+# Corre con: py -m streamlit run app_final109.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -35,13 +35,13 @@ def _gsheets_webhook_url():
     except:
         return ""
 def _cargar_desde_gsheets():
-    # FINAL 108: Al abrir la app, leer del Sheet para no perder capturas si se reinicia el celular
+    # FINAL 109: Al abrir la app, leer del Sheet para no perder capturas si se reinicia el celular
     try:
         _url = _gsheets_webhook_url()
         if not _url:
             return False
         import requests
-        _r = requests.get(_url, timeout=15)
+        _r = requests.get(_url, timeout=5)
         if _r.status_code in (200, 302):
             _j = _r.json()
             _regs = _j.get("registros", [])
@@ -59,10 +59,10 @@ def _guardar_en_gsheets():
             return False, "Falta webhook_url en Secrets - pon el enlace de tu Apps Script"
         import requests
         _regs = list(st.session_state.get("registros", []))
-        # FINAL 108: Antes de guardar, leer lo que ya hay en el Sheet y juntarlo con lo nuevo.
+        # FINAL 109: Antes de guardar, leer lo que ya hay en el Sheet y juntarlo con lo nuevo.
         # Si no, cuando guardas a otro alumno, el anterior se borra porque solo manda el nuevo.
         try:
-            _r_get = requests.get(_url, timeout=10)
+            _r_get = requests.get(_url, timeout=5)
             if _r_get.status_code in (200, 302):
                 _exist = _r_get.json().get("registros", [])
                 _claves = set()
@@ -72,18 +72,19 @@ def _guardar_en_gsheets():
                     if _k not in _claves:
                         _claves.add(_k)
                         _merged.append(_r0)
-                # Si el usuario borro a proposito en esta sesion, no revivir lo borrado: usar solo lo de la app
+                # Si el usuario borro a proposito, no revivir lo borrado en ESTE guardado, pero limpiar el flag para que el siguiente guardado si junte al anterior
                 if st.session_state.get("_sheet_borrado_a_proposito", False):
                     _regs = _regs
+                    st.session_state._sheet_borrado_a_proposito = False
                 else:
                     _regs = _merged
                     st.session_state.registros = _regs
         except:
             pass
-        # FINAL 108: Si registros esta vacio y nunca se cargo del Sheet en esta sesion, NO mandar [] porque borraria el Sheet al reiniciar.
+        # FINAL 109: Si registros esta vacio y nunca se cargo del Sheet en esta sesion, NO mandar [] porque borraria el Sheet al reiniciar.
         if not _regs and not st.session_state.get("_sheet_borrado_a_proposito", False) and not st.session_state.get("_sheet_cargado", False) and not st.session_state.get("_hubo_captura_esta_sesion", False):
             return False, "No se mando vacio para no borrar el Sheet al reiniciar - primero carga del Sheet"
-        _r = requests.post(_url, json={"registros": _regs}, timeout=15)
+        _r = requests.post(_url, json={"registros": _regs}, timeout=5)
         if _r.status_code in (200, 302):
             return True, f"Guardado en Google Sheet - {len(_regs)} capturas en Registros"
         return False, f"Apps Script respondio {_r.status_code}: {_r.text[:200]}"
@@ -659,7 +660,7 @@ def mostrar_encabezado():
 # Ya no se escribe ni se lee ningun .json de la nube.
 def _guardar_listas_archivo():
     # Ya no escribe listas.json. Solo queda en memoria. Para guardar de verdad, usa Descargar Respaldo.
-    # FINAL 108: Cada que se guarda o se borra algo, se manda solo al Google Sheet, para que no se quede el borrado en el Sheet
+    # FINAL 109: Cada que se guarda o se borra algo, se manda solo al Google Sheet, para que no se quede el borrado en el Sheet
     try:
         if st.session_state.get("registros"):
             st.session_state._hubo_captura_esta_sesion = True
@@ -868,7 +869,7 @@ def calcular_calificacion_final(nombre, escuela, grupo):
     if not regs: return None
     _metas_g = st.session_state.get("metas_trimestre", {}).get(f"{escuela}|{grupo}", {})
     def _prom(mapa, campo, meta_key=None):
-        # FINAL 108: Solo contar lo que SI se evaluo ese dia. Si ese dia no se puso Practica/Proyecto/Tarea, no cuenta, no baja la calificacion.
+        # FINAL 109: Solo contar lo que SI se evaluo ese dia. Si ese dia no se puso Practica/Proyecto/Tarea, no cuenta, no baja la calificacion.
         # Valores que significan "no se evaluo ese dia" no son 0, son None.
         _NO_EVALUADO = {"", None, "Sin práctica", "Sin practica", "Sin proyecto", "Sin tarea", "Sin trabajo", "No aplica", "No se evaluó", "No se evaluo", "Ninguno", "Ninguna", "Sin examen", "Sin asistencia", "-"}
         pts = []
