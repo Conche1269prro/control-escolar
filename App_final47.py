@@ -1,6 +1,6 @@
 
 # MIS TRABAJOS Y CALIFICACIONES - FINAL 102 - GOOGLE SHEET POR APPS SCRIPT WEBHOOK, RECONSTRUIDA DESDE 99, SIN ERROR NAMEERROR - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final116.py
+# Corre con: py -m streamlit run app_final120.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -35,7 +35,7 @@ def _gsheets_webhook_url():
     except:
         return ""
 def _cargar_desde_gsheets():
-    # FINAL 116: Al abrir la app, leer del Sheet para no perder capturas si se reinicia el celular
+    # FINAL 120: Al abrir la app, leer del Sheet para no perder capturas si se reinicia el celular
     try:
         _url = _gsheets_webhook_url()
         if not _url:
@@ -46,7 +46,7 @@ def _cargar_desde_gsheets():
             _j = _r.json()
             _regs = _j.get("registros", [])
             if _regs:
-                # FINAL 116: Limpiar fecha fea que viene del Sheet como 2026-11-17T06:00:00.000Z
+                # FINAL 120: Limpiar fecha fea que viene del Sheet como 2026-11-17T06:00:00.000Z
                 _DIAS = ["lunes","martes","miércoles","jueves","viernes","sábado","domingo"]
                 _MESES = ["","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
                 for _rr in _regs:
@@ -77,7 +77,7 @@ def _guardar_en_gsheets():
             return False, "Falta webhook_url en Secrets - pon el enlace de tu Apps Script"
         import requests
         _regs = list(st.session_state.get("registros", []))
-        # FINAL 116: Antes de guardar, leer lo que ya hay en el Sheet y juntarlo con lo nuevo.
+        # FINAL 120: Antes de guardar, leer lo que ya hay en el Sheet y juntarlo con lo nuevo.
         # Si no, cuando guardas a otro alumno, el anterior se borra porque solo manda el nuevo.
         try:
             _r_get = requests.get(_url, timeout=5)
@@ -85,9 +85,9 @@ def _guardar_en_gsheets():
                 try:
                     _exist = _r_get.json().get("registros", [])
                 except:
-                    # FINAL 116: Si el Apps Script es viejo y no regresa JSON con registros, NO sobrescribir el Sheet con solo lo nuevo porque borraria al anterior.
+                    # FINAL 120: Si el Apps Script es viejo y no regresa JSON con registros, NO sobrescribir el Sheet con solo lo nuevo porque borraria al anterior.
                     return False, "Tu Apps Script es viejo - actualizalo al FINAL 106 para que no borre al anterior. No se guardo para no borrar nada." 
-                # FINAL 116: Normalizar Fecha a YYYY-MM-DD aunque venga en 3 formatos: "2026-11-17", "2026-11-17 00:00:00", "17/11/2026" o "martes 17 de noviembre". Si no, se duplica todo.
+                # FINAL 120: Normalizar Fecha a YYYY-MM-DD aunque venga en 3 formatos: "2026-11-17", "2026-11-17 00:00:00", "17/11/2026" o "martes 17 de noviembre". Si no, se duplica todo.
                 def _norm_fecha(_v):
                     _s = str(_v or "").strip()
                     # Si viene como 17/11/2026, voltearlo a 2026-11-17
@@ -96,15 +96,28 @@ def _guardar_en_gsheets():
                         if len(_partes) == 3 and len(_partes[2]) == 4:
                             return f"{_partes[2]}-{_partes[1].zfill(2)}-{_partes[0].zfill(2)}"
                     return _s[:10]
-                # FINAL 116: Si capturas a uno y se duplican todos, es porque la clave usaba solo Fecha. Ahora usa FechaBonita tambien, que es mas estable.
-                # Si FechaBonita es igual, es el mismo dia aunque Fecha venga diferente.
+                # FINAL 120: SOLO 1 FECHA - usar solo Fecha YYYY-MM-DD para no duplicar. FechaBonita NO se usa para dedup porque venia como "martes 17 de noviembre" y como "2026-11-17" y los contaba como 2.
+                # Ademas, forzar FechaBonita desde Fecha para que siempre sea 1 sola.
+                _DIAS117 = ["lunes","martes","miércoles","jueves","viernes","sábado","domingo"]
+                _MESES117 = ["","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+                def _fecha_bonita_117(_f):
+                    try:
+                        from datetime import date as _d117
+                        _y,_m,_dd = map(int, _f.split("-"))
+                        _dt = _d117(_y,_m,_dd)
+                        return f"{_DIAS117[_dt.weekday()]} {_dd} de {_MESES117[_m]}"
+                    except:
+                        return _f
                 _por_clave = {}
                 for _r0 in _exist + _regs:
-                    _fb = str(_r0.get("FechaBonita","") or "").strip()
-                    # Si hay FechaBonita, usarla como clave principal porque no cambia de formato. Si no, usar Fecha normalizada.
-                    _clave_fecha = _fb if _fb else _norm_fecha(_r0.get("Fecha",""))
-                    _k = (str(_r0.get("Alumno","")).strip().lower(), str(_r0.get("Escuela","")).strip().lower(), str(_r0.get("Grupo","")).strip().lower(), _clave_fecha)
-                    _por_clave[_k] = _r0  # el ultimo gana = lo de la app
+                    _f_norm = _norm_fecha(_r0.get("Fecha",""))
+                    # Si Fecha viene como "martes 17 de noviembre" (sin guiones), intentar sacarla de FechaBonita
+                    if "-" not in _f_norm and _r0.get("FechaBonita"):
+                        _f_norm = _norm_fecha(_r0.get("FechaBonita",""))
+                    _r0["Fecha"] = _f_norm
+                    _r0["FechaBonita"] = _fecha_bonita_117(_f_norm)
+                    _k = (str(_r0.get("Alumno","")).strip().lower(), str(_r0.get("Escuela","")).strip().lower(), str(_r0.get("Grupo","")).strip().lower(), _f_norm)
+                    _por_clave[_k] = _r0
                 _merged = list(_por_clave.values())
                 # Si el usuario borro a proposito, no revivir lo borrado en ESTE guardado, pero limpiar el flag para que el siguiente guardado si junte al anterior
                 if st.session_state.get("_sheet_borrado_a_proposito", False):
@@ -115,15 +128,15 @@ def _guardar_en_gsheets():
                     st.session_state.registros = _regs
         except:
             pass
-        # FINAL 116: Si registros esta vacio y nunca se cargo del Sheet en esta sesion, NO mandar [] porque borraria el Sheet al reiniciar.
+        # FINAL 120: Si registros esta vacio y nunca se cargo del Sheet en esta sesion, NO mandar [] porque borraria el Sheet al reiniciar.
         if not _regs and not st.session_state.get("_sheet_borrado_a_proposito", False) and not st.session_state.get("_sheet_cargado", False) and not st.session_state.get("_hubo_captura_esta_sesion", False):
             return False, "No se mando vacio para no borrar el Sheet al reiniciar - primero carga del Sheet"
-        # FINAL 116: Quitar duplicados de lo que se va a mandar, aunque ya vengan duplicados en la sesion. Si no, se duplican todos.
+        # FINAL 120: Quitar duplicados de lo que se va a mandar, aunque ya vengan duplicados en la sesion. Si no, se duplican todos.
         _seen = set()
         _regs_sin_dup = []
         for _rr in _regs:
-            _fb2 = str(_rr.get("FechaBonita","") or "").strip()
-            _cf2 = _fb2 if _fb2 else str(_rr.get("Fecha",""))[:10]
+            # FINAL 120: Solo 1 fecha - dedup por Fecha YYYY-MM-DD, no por FechaBonita
+            _cf2 = str(_rr.get("Fecha","") or "").strip().split("T")[0][:10]
             _k2 = (str(_rr.get("Alumno","")).strip().lower(), str(_rr.get("Escuela","")).strip().lower(), str(_rr.get("Grupo","")).strip().lower(), _cf2)
             if _k2 not in _seen:
                 _seen.add(_k2)
@@ -705,7 +718,7 @@ def mostrar_encabezado():
 # Lo UNICO que si se guarda de verdad es el RESPALDO que TU descargas con el boton "Descargar Respaldo" y que TU vuelves a subir con "Restaurar Respaldo" cuando subas una version nueva.
 # Ya no se escribe ni se lee ningun .json de la nube.
 def _guardar_listas_archivo():
-    # FINAL 116: Ya NO manda sola al Sheet cada que abres algo, porque eso duplicaba sin que te metieras al alumno.
+    # FINAL 120: Ya NO manda sola al Sheet cada que abres algo, porque eso duplicaba sin que te metieras al alumno.
     # Solo se manda cuando le das a Guardar, a Borrar este dia, o a Probar.
     return
 def _cargar_listas_archivo():
@@ -908,7 +921,7 @@ def calcular_calificacion_final(nombre, escuela, grupo):
     if not regs: return None
     _metas_g = st.session_state.get("metas_trimestre", {}).get(f"{escuela}|{grupo}", {})
     def _prom(mapa, campo, meta_key=None):
-        # FINAL 116: Solo contar lo que SI se evaluo ese dia. Si ese dia no se puso Practica/Proyecto/Tarea, no cuenta, no baja la calificacion.
+        # FINAL 120: Solo contar lo que SI se evaluo ese dia. Si ese dia no se puso Practica/Proyecto/Tarea, no cuenta, no baja la calificacion.
         # Valores que significan "no se evaluo ese dia" no son 0, son None.
         _NO_EVALUADO = {"", None, "Sin práctica", "Sin practica", "Sin proyecto", "Sin tarea", "Sin trabajo", "No aplica", "No se evaluó", "No se evaluo", "Ninguno", "Ninguna", "Sin examen", "Sin asistencia", "-"}
         pts = []
@@ -948,6 +961,7 @@ def calcular_calificacion_final(nombre, escuela, grupo):
     PUNTOS_POSITIVA = {"Ninguno": 0, "Ninguna": 0, "": 0, "Felicitaciones": 1, "Buen trabajo": 1, "Ayuda a sus compañeros": 1, "Excelente desempeño": 1, "Atento": 1, "Excelente desempeño en la actividad": 1, "Felicitación por buen trabajo": 1, "Felicitación por ayuda a compañeros": 1, "Excelente desempeño + Felicitación": 1}
     regs_ordenados = sorted(regs, key=lambda x: x.get("Fecha",""))
     _conteo_reinc_acum = {}
+    _n_reincidencia = 0
     pts_cond=[]
     _n_excelente = 0
     _n_felicitacion = 0
@@ -958,7 +972,8 @@ def calcular_calificacion_final(nombre, escuela, grupo):
         _ind = r.get("Indisciplina")
         _dec = PUNTOS_CONDUCTA_DECIMAS.get(str(_ind).strip(), 0) if _ind else 0
         _re = r.get("Reincidencia")
-        if _re and _re!="Ninguna":
+        if _re and str(_re).strip()!="" and str(_re).strip()!="Ninguna":
+            _n_reincidencia += 1
             _conteo_reinc_acum[_re] = _conteo_reinc_acum.get(_re, 0) + 1
             if _conteo_reinc_acum[_re] >= 2:
                 _dec += 1
@@ -975,9 +990,28 @@ def calcular_calificacion_final(nombre, escuela, grupo):
     # O sea, pierde todo ese 10% de Conducta, pero no le quitamos mas alla de ese 10%.
     # Si la neta es positiva, esa es su conducta: neta decimas = puntos en Conducta (max 10). Ej: +5 = 5.0, +10 = 10.0
     _net_decimas_conducta = _decimas_ganadas - _decimas_quitadas
-    _decimas_extras = 0.0
+    # FINAL 120: Reincidencia baja 0.2 aparte de la conducta. Ej: 1 reincidencia = -0.2, 2 reincidencias = -0.4
+    # Conducta se queda igual, solo se agrega esto.
+    _decimas_extras = -0.2 * float(_n_reincidencia)
+    # FINAL 120: Aviso si tiene 3 reincidencias seguidas de la misma indisciplina - para mandar reporte al profe y al director/a
+    _alerta_reporte = False
+    _reincidencia_aviso = ""
+    _racha = []
+    for _r_av in regs_ordenados:
+        _re_av = str(_r_av.get("Reincidencia","") or "").strip()
+        if _re_av and _re_av != "Ninguna":
+            if _racha and _racha[-1] == _re_av:
+                _racha.append(_re_av)
+            else:
+                _racha = [_re_av]
+            if len(_racha) >= 3:
+                _alerta_reporte = True
+                _reincidencia_aviso = _re_av
+                break
+        else:
+            _racha = []
     if pts_cond:
-        # FINAL 116: Conducta = 10 - quitadas + ganadas, no solo neta. Si no se porto mal y tiene 1 felicitacion, es 10, no 1.
+        # FINAL 120: Conducta = 10 - quitadas + ganadas, no solo neta. Si no se porto mal y tiene 1 felicitacion, es 10, no 1.
         # Ejemplo: 0 quitadas + 1 ganada = 10. 1 quitada + 0 ganadas = 9. 10 quitadas = 0.
         prom_cond = max(0.0, min(10.0, 10.0 - float(_decimas_quitadas) + float(_decimas_ganadas)))
         _aporte_conducta = 0.0
@@ -1018,7 +1052,7 @@ def calcular_calificacion_final(nombre, escuela, grupo):
     # FINAL 91: Conducta ya va adentro del ponderado con peso 10 y valor 0% si la neta es negativa. No se suma aparte.
     cal = max(0.0, min(10.0, cal_base + _decimas_extras))
     es_final = (prom_prac is not None and prom_proy is not None)
-    return {"cal": cal, "cal_base": cal_base, "decimas": _decimas_extras, "n_excelente": _n_excelente, "detalle": detalle, "total_peso": total_peso, "es_final": es_final, "n_regs": len(regs), "net_decimas_conducta": _net_decimas_conducta, "aporte_conducta": _aporte_conducta, "decimas_quitadas": _decimas_quitadas, "decimas_ganadas": _decimas_ganadas}
+    return {"cal": cal, "cal_base": cal_base, "decimas": _decimas_extras, "n_reincidencia": _n_reincidencia, "alerta_reporte": _alerta_reporte, "reincidencia_aviso": _reincidencia_aviso, "n_excelente": _n_excelente, "detalle": detalle, "total_peso": total_peso, "es_final": es_final, "n_regs": len(regs), "net_decimas_conducta": _net_decimas_conducta, "aporte_conducta": _aporte_conducta, "decimas_quitadas": _decimas_quitadas, "decimas_ganadas": _decimas_ganadas}
 
 def calcular_riesgo(faltas, no_trab, no_tarea, indis_n):
     puntos=faltas*2 + no_trab*2 + no_tarea*1 + indis_n*1
@@ -2193,7 +2227,7 @@ if st.session_state.alumno_activo is not None:
             st.write("Todavía no tiene capturas.")
         else:
             for idx_r, r in enumerate(sorted(regs_al, key=lambda x: x.get("Fecha",""))):
-                # FINAL 116: Si FechaBonita viene fea como 2026-11-17T06:00:00.000Z, mostrar solo 2026-11-17
+                # FINAL 120: Si FechaBonita viene fea como 2026-11-17T06:00:00.000Z, mostrar solo 2026-11-17
                 _fb_m = str(r.get("FechaBonita") or r.get("Fecha",""))
                 fecha_mostrar = _fb_m.split("T")[0] if "T" in _fb_m else _fb_m
                 st.write(f"**{fecha_mostrar}** - {r.get('Trimestre','')} - {r['Estado']} - Trabajo: {r['Trabajo']} - Tarea: {r['Tarea']} - Conducta: {r['Indisciplina']}")
