@@ -1,6 +1,6 @@
 
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final80.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 82 - TRIMESTRES + DIAS DE PRIMARIAS ADENTRO DEL CODIGO, SECUNDARIA EDITABLE - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final82.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -600,8 +600,8 @@ for _esc_fija, _listas_fija in [(ESCUELA_TOMAS_NOMBRE, LISTAS_FIJAS_TOMAS), (ESC
 if "escuela_activa" not in st.session_state: st.session_state.escuela_activa=None
 if "alumno_activo" not in st.session_state: st.session_state.alumno_activo=None
 if "trimestre" not in st.session_state: st.session_state.trimestre="Trimestre 2"
-if "tri_inicio" not in st.session_state: st.session_state.tri_inicio=date(2026,9,1)
-if "tri_fin" not in st.session_state: st.session_state.tri_fin=date(2026,11,30)
+if "tri_inicio" not in st.session_state: st.session_state.tri_inicio=date(2026,11,16)
+if "tri_fin" not in st.session_state: st.session_state.tri_fin=date(2027,3,6)
 if "trimestre_cargado" not in st.session_state: st.session_state.trimestre_cargado=False
 if "trimestre_cargado_nombre" not in st.session_state: st.session_state.trimestre_cargado_nombre=""
 # ===== DIAS GUARDADOS EN ARCHIVO - para que no se borren al cambiar de grupo, regresar, o cerrar y abrir =====
@@ -615,6 +615,32 @@ def _guardar_dias_archivo():
     return
 if "dias_clase" not in st.session_state: st.session_state.dias_clase={}
 if "dias_confirmados" not in st.session_state: st.session_state.dias_confirmados={}
+# ===== FINAL 82: DIAS FIJOS DE PRIMARIAS ADENTRO DEL CODIGO - ya no hay que ponerlos =====
+# Te los paso el profe el 16 nov 2026. Primarias NO cambian en todo el ciclo, por eso van adentro.
+# Lunes=0, Martes=1, Miercoles=2, Jueves=3, Viernes=4
+# TOMAS: 1A Lunes, 2A Miercoles, 3A Miercoles, 4A Lunes, 5A Miercoles, 5B Lunes, 6A Lunes
+# UNIDAD: 2A Martes, 3A Martes, 4A Martes, 4B Jueves, 5A Jueves, 5B Jueves
+# SECUNDARIA NO VA AQUI: ahi si te cambian horario cada mes, por eso esos dias SI los sigues cambiando tu.
+DIAS_FIJOS_PRIMARIAS = {
+    "TOMAS GAMEROS # 2131|1A": [0],
+    "TOMAS GAMEROS # 2131|2A": [2],
+    "TOMAS GAMEROS # 2131|3A": [2],
+    "TOMAS GAMEROS # 2131|4A": [0],
+    "TOMAS GAMEROS # 2131|5A": [2],
+    "TOMAS GAMEROS # 2131|5B": [0],
+    "TOMAS GAMEROS # 2131|6A": [0],
+    "UNIDAD PROLETARIA # 2294|2A": [1],
+    "UNIDAD PROLETARIA # 2294|3A": [1],
+    "UNIDAD PROLETARIA # 2294|4A": [1],
+    "UNIDAD PROLETARIA # 2294|4B": [3],
+    "UNIDAD PROLETARIA # 2294|5A": [3],
+    "UNIDAD PROLETARIA # 2294|5B": [3],
+}
+# Al abrir, poner los dias fijos de primarias y marcarlos como confirmados. Si ya tenias otros dias en primarias, estos los corrigen solos.
+# Secundaria NO se toca, esos los sigues poniendo tu cada mes.
+for _llave_fija, _dias_fijos in DIAS_FIJOS_PRIMARIAS.items():
+    st.session_state.dias_clase[_llave_fija] = list(_dias_fijos)
+    st.session_state.dias_confirmados[_llave_fija] = True
 # Al abrir, si no hay nada en memoria pero si hay archivo, cargarlo. Si ya hay en memoria, no pisarlo.
 if not st.session_state.dias_clase and not st.session_state.dias_confirmados:
     _dc, _dconf = _cargar_dias_archivo()
@@ -651,10 +677,13 @@ def _ir_a_portada_limpio():
 # Antes el trimestre solo vivia en la memoria. Si recargabas o cambiabas de pagina, se perdia y se quedaba con el ultimo.
 # Ahora cada trimestre que configuras se guarda en trimestres.json, y al abrir, el programa busca SOLO en que trimestre cae HOY y pone ese.
 # FINAL 78: trimestres POR DEFECTO adentro del codigo. Si la nube borra trimestres.json al reiniciarse, ya no se queda en blanco.
+# FINAL 81: TRIMESTRES CORREGIDOS por el profe el 16 nov 2026 - ya no son los de antes
+# Trimestre 1: 31 ago al 14 nov 2026 / Trimestre 2: 16 nov al 6 mar 2027 / Trimestre 3: 8 mar al 4 jul 2027
+# Hoy 16 nov 2026 ya cae en Trimestre 2, por eso al abrir debe decir Trimestre 2 solo.
 TRIMESTRES_POR_DEFECTO = [
-    {"nombre": "Trimestre 1", "inicio": "2026-09-01", "fin": "2026-11-30"},
-    {"nombre": "Trimestre 2", "inicio": "2026-12-01", "fin": "2027-03-08"},
-    {"nombre": "Trimestre 3", "inicio": "2027-03-09", "fin": "2027-06-30"},
+    {"nombre": "Trimestre 1", "inicio": "2026-08-31", "fin": "2026-11-14"},
+    {"nombre": "Trimestre 2", "inicio": "2026-11-16", "fin": "2027-03-06"},
+    {"nombre": "Trimestre 3", "inicio": "2027-03-08", "fin": "2027-07-04"},
 ]
 def _cargar_trimestres_archivo():
     # FINAL 79: ya no se lee trimestres.json. Siempre se usan los 3 de adentro del codigo, por eso ya no se pierde ninguno.
@@ -779,7 +808,7 @@ def trimestre_terminado():
 # ===== LISTAS FIJAS LEIDAS DE TUS PDFs - FINAL 67 =====
 
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - que el programa detecte solo (recomendado)"):
-    # FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 82 - TRIMESTRES + DIAS DE PRIMARIAS ADENTRO DEL CODIGO, SECUNDARIA EDITABLE REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     # FINAL 66: AUTO SI SIRVE, como antes. Auto = detectar el grupo por pagina, leyendo lo que dice el PDF (1A, 2A, 1B, 3C, etc).
@@ -1357,7 +1386,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 82 - TRIMESTRES + DIAS DE PRIMARIAS ADENTRO DEL CODIGO, SECUNDARIA EDITABLE - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -1557,7 +1586,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 82 - TRIMESTRES + DIAS DE PRIMARIAS ADENTRO DEL CODIGO, SECUNDARIA EDITABLE: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
