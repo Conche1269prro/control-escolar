@@ -1,5 +1,6 @@
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final98.py
+
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 99 - GOOGLE SHEET CON GSPREAD, NO CON GSheetsConnection QUE YA NO EXISTE - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final99.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -9,40 +10,66 @@ import pandas as pd
 # Si todavia no configuras el Sheet, la app sigue trabajando como antes con Respaldo, no se traba.
 def _gsheets_conectado():
     try:
-        if "gsheets" in st.secrets:
-            return True
         if "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
+            return True
+        if "gsheets" in st.secrets:
             return True
         return False
     except:
         return False
+def _abrir_sheet_gspread():
+    # FINAL 99: Usar gspread directo, no GSheetsConnection, porque Streamlit ya no trae GSheetsConnection y por eso te decia Invalid connection
+    import gspread
+    from google.oauth2.service_account import Credentials
+    _sec = st.secrets["connections"]["gsheets"] if "connections" in st.secrets and "gsheets" in st.secrets["connections"] else st.secrets["gsheets"]
+    _info = dict(_sec)
+    # gspread necesita que private_key tenga saltos reales, no \n
+    if "private_key" in _info and "\\n" in _info["private_key"]:
+        _info["private_key"] = _info["private_key"].replace("\\n", "\n")
+    _scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+    _creds = Credentials.from_service_account_info(_info, scopes=_scopes)
+    _client = gspread.authorize(_creds)
+    _url = _info.get("spreadsheet", "") or _sec.get("spreadsheet", "")
+    if _url.startswith("http"):
+        _sh = _client.open_by_url(_url)
+    else:
+        _sh = _client.open_by_key(_url)
+    return _sh
 def _cargar_desde_gsheets():
-    # Lee Registros, Alumnos, Dias, Trimestres desde tu Google Sheet. Si no hay Sheet, regresa False y sigue normal.
     try:
         if not _gsheets_conectado():
             return False
-        conn = st.connection("gsheets", type="GSheetsConnection")
-        # Registros
+        _sh = _abrir_sheet_gspread()
         try:
-            df = conn.read(worksheet="Registros", ttl=0)
-            if df is not None and len(df) > 0:
-                st.session_state.registros = df.fillna("").to_dict("records")
+            _ws = _sh.worksheet("Registros")
+            _vals = _ws.get_all_records()
+            if _vals:
+                st.session_state.registros = _vals
         except:
             pass
         return True
     except:
         return False
 def _guardar_en_gsheets():
-    # FINAL 97: Guarda en Google Sheet y AVISA si no guardo, para que no se quede callado
+    # FINAL 99: Guarda con gspread, avisa si no guardo
     try:
         if not _gsheets_conectado():
             return False, "No hay Google Sheet conectado en Secrets"
-        conn = st.connection("gsheets", type="GSheetsConnection")
-        if st.session_state.get("registros") is not None:
-            df = pd.DataFrame(st.session_state.registros)
-            conn.update(worksheet="Registros", data=df)
-            return True, f"Guardado en Google Sheet - {len(df)} capturas en Registros"
-        return False, "No hay registros"
+        _sh = _abrir_sheet_gspread()
+        try:
+            _ws = _sh.worksheet("Registros")
+        except:
+            _ws = _sh.add_worksheet(title="Registros", rows=1000, cols=20)
+        _regs = st.session_state.get("registros", [])
+        if not _regs:
+            return False, "No hay registros para guardar"
+        _cols = ["Alumno","Escuela","Grupo","Trimestre","Fecha","FechaBonita","Estado","Trabajo","Tarea","Indisciplina","Practica","Proyecto","Reincidencia","Excelente","Anotacion","Examen","FechaExamen"]
+        _data = [_cols]
+        for _r in _regs:
+            _data.append([str(_r.get(_c, "")) for _c in _cols])
+        _ws.clear()
+        _ws.update(_data)
+        return True, f"Guardado en Google Sheet - {len(_regs)} capturas en Registros"
     except Exception as _e_gs:
         return False, f"No se pudo guardar en Google Sheet: {_e_gs}"
 from datetime import date, timedelta
@@ -956,7 +983,7 @@ def trimestre_terminado():
 # ===== LISTAS FIJAS LEIDAS DE TUS PDFs - FINAL 67 =====
 
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - que el programa detecte solo (recomendado)"):
-    # FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 99 - GOOGLE SHEET CON GSPREAD, NO CON GSheetsConnection QUE YA NO EXISTE REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     # FINAL 66: AUTO SI SIRVE, como antes. Auto = detectar el grupo por pagina, leyendo lo que dice el PDF (1A, 2A, 1B, 3C, etc).
@@ -1619,7 +1646,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 99 - GOOGLE SHEET CON GSPREAD, NO CON GSheetsConnection QUE YA NO EXISTE - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -1819,7 +1846,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 99 - GOOGLE SHEET CON GSPREAD, NO CON GSheetsConnection QUE YA NO EXISTE: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
