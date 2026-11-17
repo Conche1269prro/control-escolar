@@ -1,6 +1,6 @@
 
 # MIS TRABAJOS Y CALIFICACIONES - FINAL 102 - GOOGLE SHEET POR APPS SCRIPT WEBHOOK, RECONSTRUIDA DESDE 99, SIN ERROR NAMEERROR - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final103.py
+# Corre con: py -m streamlit run app_final104.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -621,6 +621,12 @@ def mostrar_encabezado():
 # Ya no se escribe ni se lee ningun .json de la nube.
 def _guardar_listas_archivo():
     # Ya no escribe listas.json. Solo queda en memoria. Para guardar de verdad, usa Descargar Respaldo.
+    # FINAL 104: Cada que se guarda o se borra algo, se manda solo al Google Sheet, para que no se quede el borrado en el Sheet
+    try:
+        if _gsheets_conectado():
+            _guardar_en_gsheets()
+    except:
+        pass
     return
 def _cargar_listas_archivo():
     # FINAL 79: ya no se lee listas.json de la nube, porque la nube lo borra. Se regresa vacio y las listas fijas de abajo (UNIDAD + SECUNDARIA) son las que cargan.
