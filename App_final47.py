@@ -1,6 +1,6 @@
 
 # MIS TRABAJOS Y CALIFICACIONES - FINAL 99 - GOOGLE SHEET CON GSPREAD, NO CON GSheetsConnection QUE YA NO EXISTE - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final99.py
+# Corre con: py -m streamlit run app_final101.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -9,498 +9,54 @@ import pandas as pd
 # Genera TODO lo que ya tenemos: ficha, historial, desglose final, color VERDE/AMARILLO/ROJO, calificacion, PDF, dias fijos, trimestres.
 # Si todavia no configuras el Sheet, la app sigue trabajando como antes con Respaldo, no se traba.
 def _gsheets_conectado():
+    # FINAL 101: GOOGLE SHEET POR APPS SCRIPT WEBHOOK - no necesita gspread, solo requests que ya trae Streamlit
     try:
-        if "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
+        if "gsheets_webhook" in st.secrets:
             return True
+        if "connections" in st.secrets and "gsheets_webhook" in st.secrets["connections"]:
+            return True
+        if "gsheets" in st.secrets and "webhook_url" in st.secrets["gsheets"]:
+            return True
+        return False
+    except:
+        return False
+def _gsheets_webhook_url():
+    try:
+        if "gsheets_webhook" in st.secrets:
+            _v = st.secrets["gsheets_webhook"]
+            if isinstance(_v, str):
+                return _v
+            return _v.get("url", "") or _v.get("webhook_url", "")
+        if "connections" in st.secrets and "gsheets_webhook" in st.secrets["connections"]:
+            _v = st.secrets["connections"]["gsheets_webhook"]
+            if isinstance(_v, str):
+                return _v
+            return _v.get("url", "") or _v.get("webhook_url", "")
         if "gsheets" in st.secrets:
-            return True
-        return False
+            return st.secrets["gsheets"].get("webhook_url", "") or st.secrets["gsheets"].get("url", "")
+        return ""
     except:
-        return False
-def _abrir_sheet_gspread():
-    # FINAL 99: Usar gspread directo, no GSheetsConnection, porque Streamlit ya no trae GSheetsConnection y por eso te decia Invalid connection
-    import gspread
-    from google.oauth2.service_account import Credentials
-    _sec = st.secrets["connections"]["gsheets"] if "connections" in st.secrets and "gsheets" in st.secrets["connections"] else st.secrets["gsheets"]
-    _info = dict(_sec)
-    # gspread necesita que private_key tenga saltos reales, no \n
-    if "private_key" in _info and "\\n" in _info["private_key"]:
-        _info["private_key"] = _info["private_key"].replace("\\n", "\n")
-    _scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    _creds = Credentials.from_service_account_info(_info, scopes=_scopes)
-    _client = gspread.authorize(_creds)
-    _url = _info.get("spreadsheet", "") or _sec.get("spreadsheet", "")
-    if _url.startswith("http"):
-        _sh = _client.open_by_url(_url)
-    else:
-        _sh = _client.open_by_key(_url)
-    return _sh
+        return ""
 def _cargar_desde_gsheets():
-    try:
-        if not _gsheets_conectado():
-            return False
-        _sh = _abrir_sheet_gspread()
-        try:
-            _ws = _sh.worksheet("Registros")
-            _vals = _ws.get_all_records()
-            if _vals:
-                st.session_state.registros = _vals
-        except:
-            pass
-        return True
-    except:
-        return False
+    # Apps Script solo escribe, no lee. La carga sigue siendo con Respaldo, pero el guardado si va al Sheet.
+    return False
 def _guardar_en_gsheets():
-    # FINAL 99: Guarda con gspread, avisa si no guardo
+    # FINAL 101: Guarda en Google Sheet por Apps Script - sin gspread, sin error
     try:
-        if not _gsheets_conectado():
-            return False, "No hay Google Sheet conectado en Secrets"
-        _sh = _abrir_sheet_gspread()
-        try:
-            _ws = _sh.worksheet("Registros")
-        except:
-            _ws = _sh.add_worksheet(title="Registros", rows=1000, cols=20)
+        _url = _gsheets_webhook_url()
+        if not _url:
+            return False, "Falta webhook_url en Secrets - pon el enlace de tu Apps Script"
+        import requests
         _regs = st.session_state.get("registros", [])
         if not _regs:
             return False, "No hay registros para guardar"
-        _cols = ["Alumno","Escuela","Grupo","Trimestre","Fecha","FechaBonita","Estado","Trabajo","Tarea","Indisciplina","Practica","Proyecto","Reincidencia","Excelente","Anotacion","Examen","FechaExamen"]
-        _data = [_cols]
-        for _r in _regs:
-            _data.append([str(_r.get(_c, "")) for _c in _cols])
-        _ws.clear()
-        _ws.update(_data)
-        return True, f"Guardado en Google Sheet - {len(_regs)} capturas en Registros"
+        _r = requests.post(_url, json={"registros": _regs}, timeout=15)
+        if _r.status_code in (200, 302):
+            return True, f"Guardado en Google Sheet - {len(_regs)} capturas en Registros"
+        return False, f"Apps Script respondio {_r.status_code}: {_r.text[:200]}"
     except Exception as _e_gs:
         return False, f"No se pudo guardar en Google Sheet: {_e_gs}"
-from datetime import date, timedelta
-from io import BytesIO
-import re
-DOCENTE="Mario Alberto Diaz Becerra"
-st.set_page_config(page_title="Mis Trabajos y Calificaciones", layout="centered", initial_sidebar_state="collapsed")
 
-# FINAL 68: listas ARRIBA, antes de que el programa las use. Asi ya no sale NameError.
-LISTAS_FIJAS_UNIDAD = {
-"2A": [
-"AVILA GONZALEZ ESMERALDA YARITZA",
-"CHAPARRO GARFIO MIA MONCERRAT",
-"DURAN SAENZ EIMY MARELY",
-"ESCOBAR CHAVEZ JULIA MADAHI",
-"ESPINOZA CRUZ PEDRO EZEQUIEL CRUZ",
-"FABELA CORTEZ YAREL ALONSO",
-"FAVELA ESCOBEDO MADELINE ARLETH",
-"GAMBOA GONZALEZ ELISA VICTORIA",
-"GARCIA PEREZ JOEL EDUARDO",
-"HERRERA MANZANARES MARELYN ESTELA",
-"HERRERA RAMIREZ IAN SAMIR",
-"IBARRA GONZALEZ FERNANDO EMANUEL",
-"MEDELLIN PINEDA NICOLAS",
-"MENDOZA HOLGUIN JAVIER SAUL",
-"MIRANDA RIVERA SEBASTIAN",
-"MOLINA LOERA ZULEYMI VICTORIA",
-"NEVAREZ URBINA ALISON FERNANDA",
-"PALMA IBAÑEZ JAZIEL ALONSO",
-"PARRA GONZALEZ JUAN",
-"PEREZ RODRIGUEZ OSMARA ALEJANDRA",
-"QUINTANA FUENTES MEISY SAMANTHA",
-"RAMIREZ ROA IKER SANTIAGO",
-"RAMOS ESCARCEGA VALERIA",
-"REZA VALENZUELA CIELO IVONNE",
-"RUIZ VENZOR LAYLA JOSABETH",
-"SALCIDO MENCHACA IVAN CALEB",
-"SANCHEZ RAZO FERNANDA ITAI",
-"SUAREZ AGUIRRE IKER GAEL",
-"TORRES CHAPARRO DANNA VALERIA",
-"TORRES RAMOS SARA MARIANNE",
-"TRILLO SOLIS IAN PAUL",
-"VALDEZ RAMOS SANTIAGO DAMIAN",
-"VALDEZ VILLALBA IAN JARED",
-"VELOZ ACEVEDO HECTOR ABRAHAM",
-"XOLOTL MARTINEZ IHAN KALEHB",
-"ZAPATA CRUZ ERICK MATEO"
-],
-"3A": [
-"CARBAJAL VILLAR BRITHANY JAQUELIN",
-"CASTILLO GONZALEZ MAHELET SARELY",
-"CENTENO FLORES ANGEL GABRIEL",
-"CHAPARRO PEREZ GEORGINA",
-"CHAVEZ BARRERA LIA AITANA",
-"CHAVEZ JR OLIVAS JOSE",
-"DOMINGUEZ COVARRUBIAS IVON ARACELY",
-"ESPINOZA CORREDOR ANALY HATSUMI",
-"FELIX PEREZ OMAR EDUARDO",
-"FLORES DE LA CRUZ NICOL ELIZABETH",
-"GUERRA MARTINEZ SOFIA SOLEDAD",
-"HERNANDEZ MORENO MELANY JULIETT",
-"IBARRA GONZALEZ DEREK ALEJANDRO",
-"LOZANO DIAZ ERIK APOLONIO",
-"LUCERO GONZALEZ DANIEL ELI",
-"MENDOZA ENRIQUEZ AMANDA LIZETH",
-"NUÑEZ MANCINAS JOEL JERONIMO",
-"PERAZA RIVERA EINAR EZEQUIEL",
-"PORTILLO RAMOS MARLEN MICHEL",
-"SALIDO VALENZUELA JOEL ARIEL",
-"VALERIANO MORALES SHELSY YAMILETH"
-],
-"4A": [
-"AVENDAÑO CAMPOS DERECK RENE",
-"BIBIANO RODRIGUEZ MELANY ALEXA",
-"CANO TORRES YESLI TAMARA",
-"CORDOBA GARCIA LARRY YAEL",
-"CORRAL TELLEZ MIA JAZMIN",
-"DELGADO HERNANDEZ DANIEL ALEJANDRO",
-"DIAZ MEZA DILAN LEONARDO",
-"DIAZ VILLEZCAS YAEL FERNANDO",
-"DOMINGUEZ HERNANDEZ ANDREA",
-"DOMINGUEZ ORTEGA NAHOMI MARBELLA",
-"ESPINOZA GONZALEZ XIMENA SARAHI",
-"ESTEVEZ RAMIREZ HASIEL ISRAEL",
-"HERNANDEZ ACEVES JUNIOR ISAAC",
-"JAQUEZ PONCE XIMENA ADILENE",
-"JAUREGUI VELAZQUEZ GERALDINE CONSUELO",
-"JUAREZ MENDOZA JOHANA SOFIA",
-"MORENO DANIEL JAZMIN ANAHY",
-"MUÑOZ SAPIEN AIDIN SHANTAL",
-"OLIVARES LOPEZ JOSHUA ALEJANDRO",
-"OLIVAS REY YAZLIN ANDREA",
-"PEÑA GONZALEZ RODRIGO",
-"REY ESTRADA LIAM SAUL",
-"REZA VALENZUELA LUNA YOSELIN",
-"RIVERA PADILLA NATALIA NAHOMI",
-"ROA RAMOS SARA MICHELLE",
-"RODRIGUEZ CORREDOR IKER ADAIR",
-"RUBIO VALDEZ IKER AZAEL",
-"VEGA ALEMAN ABNER GABRIEL"
-],
-"4B": [
-"ANDAZOLA ROSAS DULCE YARETZI",
-"BARFFUSON VILLAGRAN IBRAHIM",
-"CARDENAS VELAZQUEZ AARON EDUARDO",
-"CHAVEZ OLIVAS ESBEYDI",
-"DOMINGUEZ ALCANTAR MIA YAMILETH",
-"DOMINGUEZ ALCANTAR RENATA ABIGAIL",
-"DOMINGUEZ COVARRUBIAS ABRIL YESENIA",
-"FIERRO MORENO SURI VALENTINA",
-"GALLEGOS CASTRO JASIEL ALEXIS",
-"GARCIA PARRA GABRIEL JACOB",
-"GARCIA ZAMARRON HEBER MIGUEL",
-"GONZALEZ MONTES ARIANA YAMILETH",
-"GRADO AVILA SEBASTIAN",
-"HERNANDEZ DE LA TORRE PRISCILA NATALIA",
-"HERRERA RAMIREZ ANGEL SEBASTIAN",
-"MACIAS MORENO REBECA VICTORIA",
-"MEDINA LOPEZ DRAKE SANTIAGO",
-"MONGE ESCARCEGA ALONDRA ESTEFANIA",
-"PAYAN PIZARRO ARIANA MARELY",
-"PEREYRA TAPIA EIMI VICTORIA",
-"PORTILLO FLORES PAUL ISAIR",
-"QUIROZ PORTILLO CARLOS ALBERTO",
-"RAMIREZ ROA AILEN ALEJANDRA",
-"REYES LOPEZ THIAGO ISMAEL",
-"ROSAS LOPEZ RICARDO ELIAN",
-"SALAZAR GONZALEZ MELANNIE AYTHANA",
-"SIDAS OLIVAS VICTORIA LILIANA",
-"TORRES RAMOS EDDY SEBASTIAN",
-"VIOLETA DEL ANGEL JESUS ABRAHAM"
-],
-"5A": [
-"AGUIRRE VEGA AIMEE FERNANDA",
-"ALARCON ALVIDREZ ELIAN OBED",
-"ALMAZAN SOSA ARLETH ELIZABETH",
-"ARMENDARIZ RODRIGUEZ BYRON CALEB",
-"AVILA VILLEZCAS EILEEN YUSEL",
-"BALTAZAR SOLANO NATHAN LIAM",
-"BARRIOS CISNEROS AYLIN DAYANA",
-"BECERRIL CAMARILLO SCARLETT ADRIANA",
-"BUSTILLOS VELAZQUEZ DARIEL DAVID",
-"CAZARES CHAVEZ SAID ALEJANDRO",
-"DE AVILA FLORES MARIO DANIEL",
-"DOMINGUEZ ORTEGA FREDY ALEXIS",
-"ESPINOZA GARCIA ADAM ALBERTO",
-"FLORES POLITO ZAYRA VICTORIA",
-"GOMEZ ALBINEDA YARETZI ARIANA",
-"GONZALEZ OLIVAS ELIAN ALEJANDRO",
-"GRANADOS MURILLO BRYANA LIZETH",
-"GUEVARA VELASCO GABRIELA CAMILA",
-"HERNANDEZ GONZALEZ IKER DANIEL",
-"HERNANDEZ RAMIREZ ANGELA YAMILETH",
-"LOPEZ ORTEGA VICTOR ALONSO",
-"MEDINA BIBIANO DANNA FERNANDA",
-"RIVERA GARCIA ANEL FERNANDA",
-"RUIZ ANGULO ADILENE MELANIE",
-"SAENZ RIVERA IVANNA SAMAI",
-"SANCHEZ GONZALEZ YATZIRI VICTORIA",
-"SANCHEZ GONZALEZ YURITZI ROMINA",
-"SILVA PEREZ AXEL JOEL",
-"SMITH LOYA RAMON ALEXIS"
-],
-"5B": [
-"ARENIVAS SANCHEZ ROBERTO ANTONIO",
-"BAILON VILLARREAL AXEL JULIAN",
-"CARAVEO MENDOZA REICHEL ALEJANDRA",
-"CHACON SINALOA AXEL LEONARDO",
-"CORDOBA GARCIA ASHLEY NAOMI",
-"ESPINOZA DURAN DANIEL ALEJANDRO",
-"FRANCO LORIA VALERIA VANESSA",
-"GARCIA MARQUEZ LUIS ANGEL",
-"GARCIA TREVIZO ALISON MAILEN",
-"GONZALEZ LOZOYA ALEXA DAYANA",
-"JUAREZ ESPARZA REGINA GABRIELA",
-"LARA PERAZA JONATHAN EFREN",
-"MANINI FRANCO DANNA ISABELLE",
-"MENDOZA FLORES JOSE MAURICIO",
-"MORALES PANTALEON ARACELI",
-"NAVARRO SUBIAS DANNA SOFIA",
-"OLIVAS PIÑON ESTEBAN",
-"PAREDES ROMERO ELIAN SAID",
-"PEREYRA TAPIA EVAN JAVIER",
-"PONCE DE LEON PRIETO OSIRIS RAMON",
-"RAMIREZ TRINIDAD SIDNEY JAEN",
-"RESENDIZ JUAREZ AYLEEN SOFIA",
-"RIVAS DOMINGUEZ BLANCA MARBELLA",
-"RIVERA PADILLA AZUL AITANA",
-"RODRIGUEZ RODRIGUEZ LUISA IVANNA",
-"RODRIGUEZ VALENZUELA GERSON SANTIAGO",
-"SINALOA GONZALEZ DELIA MALENY",
-"VARGAS GUTIERREZ ASHLEY NICOLE",
-"WALKER GENESIS ALEXA"
-]
-}
-LISTAS_FIJAS_SECUNDARIA = {
-"1B": [
-"AGUIRRE IBARRA ZOE VICTORIA",
-"AGUIRRE RAMOS CESAR OMAR",
-"ALMARAZ PAREDES ISAIAS",
-"CASTRUITA DE LA CRUZ ANGEL ALBERTO",
-"CHAPARRO LERMA GENESIS SARAI",
-"CONTRERAS GARCIA DANIELA ARIKO",
-"COSS TALAMANTES CARLOS DAMIAN",
-"DE SANTIAGO AGUILERA SAID ADRIAN",
-"DURAN VILLALBA DILANY AMERICA",
-"ENRIQUEZ ROMERO LAURA SOFIA",
-"GONZALEZ VILLA NATHAN LEHINAD",
-"ISLAS SAENZ GENESIS ANDREA",
-"LEDEZMA CARRILLO DANNA YAMILETH",
-"LOPEZ JAVIER XIMENA VALERIA",
-"MARQUEZ ANCHONDO ANGELICA ALEXA",
-"MARTINEZ BAYRRUZ MANUEL ALEJANDRO",
-"MARTINEZ FERNANDEZ ELISA",
-"MENDOZA SILVAS LEIA SOPHIA",
-"NUÑEZ LARA FATIMA VIANEY",
-"PEREZ GARCIA IKER SANTIAGO",
-"PINEDA CHAVEZ ANGEL SAID",
-"RAMIREZ DOMINGUEZ ALESSANDRA GUADALUPE",
-"ROBLES LOZANO AARON ALEXANDER",
-"RODRIGUEZ MONTIEL ALAN GERARDO",
-"SALINAS DURAN JOSELYN ITZAYANA",
-"SANCHEZ AGUILAR DIANA FERNANDA",
-"TREVIZO ACOSTA MARLEY CELESTE",
-"VILLALOBOS MORALES XIMENA",
-"YAÑEZ DELGADO DERIAN ALEXIS"
-],
-"3C": [
-"ACOSTA ALANIS CARLOS SAID",
-"BOLAÑOS ROBLEDO LEONARDO DANIEL",
-"CARDENAS FLORES BRAYAN JESUS",
-"CASTRUITA DE LA CRUZ AXEL RENE",
-"ESCARCEGA ROMAN LUIS ANGEL",
-"ESPITIA CLETO HUGO",
-"GARCIA LOPEZ ANGEL TADEO",
-"MUÑOZ BALLESTEROS IVAN PAOLO",
-"PEREZ RONQUILLO KATHERINE SOFIA",
-"QUINTANA MARTHA ANGEL ADRIAN",
-"RENTERIA TENA ANGEL SANTIAGO",
-"ROMERO PORTILLO BRANDON TADEO",
-"ROSALES MASCORRO SANTIAGO"
-]
-}
-# ===== FINAL 80: TOMAS GAMEROS ADENTRO DEL CODIGO - leido de LISTAS_DE_LOS_GRUPOS.pdf que mandaste =====
-# 1-A 28 + 2-A 28 + 3-A 26 + 4-A 18 + 5-A 18 + 5-B 18 + 6-A 26 = 162 alumnos. Ya no hay que subir su PDF nunca mas.
-LISTAS_FIJAS_TOMAS = {
-"1A": [
-"AGUIRRE OCHOA JESUS FERNANDO",
-"ALARCON SOLIS EIDAN ASAHEL",
-"BUSTILLOS MORALES ARLETTE ZAHORY",
-"CARRILLO GONZALEZ MARCOS JOSE",
-"CORCHADO MORENO DAILYN REGINA",
-"FLORES GRANADOS MARIBEL",
-"GONZALEZ RIOS DILAN",
-"HERMOSILLO RIVERO EMILIANO ALEJANDRO",
-"HIDALGO CASTILLO JUAN ADRIAN",
-"LOYA CANO JESUS ANTONIO",
-"MANRIQUEZ DUARTE MELINA",
-"MANRIQUEZ DUARTE MELISA",
-"MARES SANCHEZ FERNANDO OMAR",
-"MATA MENDOZA LUIS ANGEL",
-"MEDRANO VILLA LUISA DANIELA",
-"MELENDEZ TABURA EDNA REGINA",
-"MILLAN VILLALBA ISAAC",
-"MIRANDA FRANCO AARON",
-"MORALES LOPEZ NATALIA JIMENA",
-"NORIEGA FLORES MATIAS",
-"PEREZ DEL TORO EMILY SAMANTHA",
-"RAMIREZ HIDALGO NOAH PAULETH",
-"ROSALES NUÑEZ RENATA VICTORIA",
-"RUBIO HINOJOSA ISMAEL",
-"RUBIO RAMIREZ ELEAZAR",
-"VALAZQUEZ GONZALEZ MAYLIN JOHANA",
-"VILLALOBOS ESPARZA REGINA",
-"YAÑEZ RAMOS EMMANUEL ALI",
-],
-"2A": [
-"AGUILAR CASTILLO LUIS FERNANDO",
-"AGUILAR RODRIGUEZ MARLENE ISABELLA",
-"AL KUBAISI NAVA HAYDER KHALID FALAH",
-"ARZATE MUÑOZ ENOC ISAY",
-"ARZATE MUÑOZ SERGIO ISAIAS",
-"CASTILLO JAQUEZ AMERICA DALILA",
-"CHAVEZ CARREON AIRAM VALENTINA",
-"DELGADO HERNANDEZ CARLOS DANIEL",
-"FRANCO VIOLETA MARIO ALEXIS",
-"GALLEGOS MOLINA ADAMARIS",
-"GOMEZ RUBIO MARIA FERNANDA",
-"HERNANDEZ LOZANO AARON ENRIQUE",
-"HERNANDEZ LOZANO JULIAN ALONSO",
-"HERRERA ESTRADA MANUEL HUMBERTO",
-"HOLGUIN VASQUEZ CAMILA ABIGAIL",
-"LAREZ SOTO SOFIA VICTORIA",
-"LECHUGA LEYVA MATEO",
-"LERMA KATAJIRI DAYAMI ANDREA",
-"LOPEZ CRUZ SOFIA MABEL",
-"MAGALLANES DUARTE PAULETTE NOEMY",
-"MELENDEZ CARRILLO TADEO",
-"MELENDEZ HOLGUIN DYLAN VIDAL",
-"MOLINAR CARDENAS ALAN HUMBERTO",
-"MONTES ALDACO ABRAHAM ELIAN",
-"NUÑEZ JIMENEZ DAVID SEBASTIAN",
-"ORTEGA CARLOS DAMIAN",
-"ORTEGA BACA ANDREA",
-"TORRES AGUERO DAYLIN NAHOMY",
-],
-"3A": [
-"ALDERETE FIERRO IRVING MANUEL",
-"ALVAREZ TARIN ARIEL ALEXANDER",
-"ARANDA MARTINEZ ELINA",
-"ARMENDARIZ LUJAN SARA ILIANA",
-"BURROLA ARMENDARIZ ISABELLA",
-"FLORES VEGA CORALINE ALEJANDRA",
-"FRANCO ROMERO ARIAN",
-"GALLEGOS RIVAS MAURICIO",
-"GONZALEZ EMILIO HUMBERTO",
-"GONZALEZ CANO HEISOL DANIELA",
-"GUERRERO MENDEZ JESUS AARON",
-"HERNANDEZ DE LA CRUZ ELIETH SAMARA",
-"HERNANDEZ ESPINOZA JUAN SAID",
-"LEDEZMA TERRAZAS RAMON",
-"MEDINA REYES KAROL ALBERTO",
-"MEDRANO VILLA DANIELA AMAIRANY",
-"MELENDEZ CARRILLO JR ENRIQUE",
-"MELENDEZ TABURA ROGELIO ALBERTO",
-"MENDOZA PRIMO KARLA VALERIA",
-"MOLINAR CUEVAS MARIA RENATA",
-"RAMIREZ CALVILLO JONATHAN DANIEL",
-"RICO ARZABALA TADEO LEONEL",
-"RUBIO MARQUEZ EMMA GERALDINE",
-"SILVA CERA ABRIL ELENA",
-"TAPIA SANCHEZ DOMINIC",
-"VILLEGAS LOZANO JAZMIN LUCIA",
-],
-"4A": [
-"AGUILAR GONZALEZ BENJAMIN ISAAC",
-"ARMENDARIZ FIERRO AARON GERARDO",
-"BALDERRAMA ZUBIA IRIS ANDREA",
-"BEJAR MACIAS OSCAR MANUEL",
-"CARRASCO DELGADO MATEO",
-"CHAVIRA BEJARANO EMILY",
-"CHAVIRA GONZALEZ LUIS EMILIO",
-"DEL HIERRO RODRIGUEZ VICTORIA",
-"FIERRO VALENZUELA JOSE RAYMUNDO",
-"FLORES CORRAL LIA MARIANA",
-"GALLEGOS RIVAS KARLA MICHELL",
-"GONZALEZ ORTEGA ALISON GERALDINE",
-"GONZALEZ VAZQUEZ KARINA",
-"MANRIQUEZ DUARTE ELIAR RAFAEL",
-"NAJERA MUÑIZ JORGE LUIS",
-"PACHECO VICENCIO CALEB EDUARDO",
-"RODRIGUEZ DOMINGUEZ RENATA",
-"SOTO OLIVAS RENATA",
-],
-"5A": [
-"ARMENDARIZ NIÑO PAULINA",
-"CHAVEZ CALDERON CAMILA",
-"ESTRADA RAMIREZ ROBERTA",
-"FIGUEROA RODRIGUEZ CARIME IVANA",
-"GALLEGOS KEIRY PAOLA",
-"GONZALEZ RIOS KEVIN JESUS",
-"HIDALGO MURGUIA NYAH PATRICIA",
-"LEAL RODRIGUEZ DANTE ANDRE",
-"LOPEZ MOLINA BRISA JAZMIN",
-"MARTINEZ RUBIO ALEC",
-"NAJERA JAQUEZ VALENTINA",
-"OLIVAS ELIAS",
-"ORTEGA LUIS RAUL",
-"RAMOS DOMINGUEZ RENE",
-"RIVERO RAMIREZ ERICK ISAAC",
-"ROMERO DOMINGUEZ MATEO",
-"RUBIO MORALES LUCIANA",
-"VALDEZ VILLALOBOS HELEN ANAHY",
-],
-"5B": [
-"ALVIDREZ AGUILAR CESAR ISAAC",
-"BELTRAN GALLEGOS AMAIRANY RENATA",
-"ESTRADA SAMEER ADRIAN",
-"FLORES JOSELIN SCARLETT",
-"FLORES CORRAL DEMIAN IRAM",
-"HERNANDEZ RODRIGUEZ MAXIMILIANO",
-"JAQUEZ CARRILLO CESAR EMILIO",
-"MARQUEZ GONZALEZ EDGAR MATEO",
-"MEDINA QUEZADA AXEL AARON",
-"MOLINAR CARDENAS PAULINA YULISSA",
-"NUÑEZ GARDEA LUISA YANELI",
-"OCON GONZALEZ JAZIEL ALONSO",
-"ORTEGA LOZANO KARLA ISABELLA",
-"RAMOS PACHECO OSMAR TADEO",
-"RODRIGUEZ ROBERTO",
-"RUBIO HINOJOSA LUIS ANGEL",
-"TARIN CASTILLO AYLI",
-"VILLALOBOS ESPARZA MIA",
-],
-"6A": [
-"AL KUBAISI NAVA ALHASSAN ALI",
-"AVILA SAUCEDO DANIELA ROSARIO",
-"BALDERRAMA GONZALEZ DYLAN",
-"CENICEROS BANDA ZADQUIEL",
-"CHAVIRA BEJARANO ISABELLA",
-"DELGADO DERMA DEMETRIO",
-"FIERRO OLIVAS ANGEL SEBASTIAN",
-"GANDARA VENZOR DAEL ALEJANDRO",
-"GARCIA VARGAS ANAHI",
-"GOMEZ SERRANO KENDRA GISELLE",
-"GUERRERO VALENCIA RAUL ISAIAS",
-"HERNANDEZ MARTINEZ ALEXA",
-"LAZALDE CARMONA DANIA YAMILETH",
-"LOPEZ CRUZ SERGIO IRAM",
-"MENDIAS MENDOZA LYA JARETH",
-"MOLINAR CUEVAS MARIO",
-"MUÑOZ GONZALEZ PAUL GERARDO",
-"PONCE RUEDA ALISON ARIADNE",
-"RABAGO MERINO ALEXA MARILE",
-"RIVAS OLAVE KENDRA NICOLE",
-"SOSA TORRES MARIA TERESA",
-"TERAN SANCHEZ MARCO ELI",
-"VELASCO RAMIREZ VICTOR GAEL",
-"VELAZQUEZ GONZALEZ ALEXA JOKEBED",
-"VENEGAS MOLINA MIGUEL ANGEL",
-"VILLALOBOS SAENZ EMIR GERARDO",
-],
-}
-ESCUELA_TOMAS_NOMBRE = "TOMAS GAMEROS # 2131"
-ESCUELA_UNIDAD_NOMBRE = "UNIDAD PROLETARIA # 2294"
-ESCUELA_SECUNDARIA_NOMBRE = "ESCUELA SECUNDARIA ESTATAL # 3046"
-
-DIAS_ES=["lunes","martes","miércoles","jueves","viernes","sábado","domingo"]
-MESES_ES=["","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
-OPCIONES_DIAS=["Lunes","Martes","Miércoles","Jueves","Viernes"]
-MAPA_DIA={"Lunes":0,"Martes":1,"Miércoles":2,"Jueves":3,"Viernes":4}
 def fecha_bonita(f):
     return f"{DIAS_ES[f.weekday()]} {f.day} de {MESES_ES[f.month]} de {f.year}"
 def fecha_corta(f):
@@ -2096,14 +1652,13 @@ if st.session_state.alumno_activo is not None:
         st.write("Todavía no tiene capturas.")
     st.divider()
     # 5. Generar PDF - SOLO cuando le picas, no antes
-    # FINAL 98: Boton para probar Google Sheet - para saber por que no guardo nada
-    if st.button("🔍 Probar conexión con Google Sheet", key="btn_probar_gs_98"):
+    # FINAL 101: Boton Probar Google Sheet por Apps Script - sin gspread
+    if st.button("🔍 Probar conexión con Google Sheet", key="btn_probar_gs_101"):
         _ok_t, _msg_t = _guardar_en_gsheets()
         if _ok_t:
             st.success(f"✅ Sí está conectado: {_msg_t}")
         else:
             st.error(f"❌ No está conectado: {_msg_t}")
-            st.info("Checa: 1) Que tu pestaña se llame exactamente Registros, 2) Que en Secrets el spreadsheet sea el enlace de tu Sheet, 3) Que compartiste tu Sheet con el correo de la cuenta de servicio como Editor.")
     if st.button("📄 Generar PDF de esta ficha", key="btn_pdf_ficha_78", use_container_width=True):
         try:
             pdf_ficha=generar_pdf_ficha_alumno(nombre_al, escuela, grupo_sel)
