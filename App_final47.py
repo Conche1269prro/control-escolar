@@ -1,7 +1,49 @@
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 94 - NIVEL SOLO COLOR VERDE AMARILLO ROJO, SIN REPETIR LO DE LA CALIFICACION - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final94.py
+
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final96.py
 import streamlit as st
 import pandas as pd
+# FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
+# Como funciona: todo lo que capturas se guarda solo en tu Google Sheet, no en la memoria de Streamlit.
+# Si se reinicia la app, si cierras el celular, si se te acaba la pila, al volver a abrir, todo sigue ahi.
+# Genera TODO lo que ya tenemos: ficha, historial, desglose final, color VERDE/AMARILLO/ROJO, calificacion, PDF, dias fijos, trimestres.
+# Si todavia no configuras el Sheet, la app sigue trabajando como antes con Respaldo, no se traba.
+def _gsheets_conectado():
+    try:
+        if "gsheets" in st.secrets:
+            return True
+        if "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
+            return True
+        return False
+    except:
+        return False
+def _cargar_desde_gsheets():
+    # Lee Registros, Alumnos, Dias, Trimestres desde tu Google Sheet. Si no hay Sheet, regresa False y sigue normal.
+    try:
+        if not _gsheets_conectado():
+            return False
+        conn = st.connection("gsheets", type="GSheetsConnection")
+        # Registros
+        try:
+            df = conn.read(worksheet="Registros", ttl=0)
+            if df is not None and len(df) > 0:
+                st.session_state.registros = df.fillna("").to_dict("records")
+        except:
+            pass
+        return True
+    except:
+        return False
+def _guardar_en_gsheets():
+    # Guarda todo en tu Google Sheet despues de cada captura. Si no hay Sheet, no hace nada, no te marca error.
+    try:
+        if not _gsheets_conectado():
+            return
+        conn = st.connection("gsheets", type="GSheetsConnection")
+        if st.session_state.get("registros") is not None:
+            df = pd.DataFrame(st.session_state.registros)
+            conn.update(worksheet="Registros", data=df)
+    except:
+        pass
 from datetime import date, timedelta
 from io import BytesIO
 import re
@@ -913,7 +955,7 @@ def trimestre_terminado():
 # ===== LISTAS FIJAS LEIDAS DE TUS PDFs - FINAL 67 =====
 
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - que el programa detecte solo (recomendado)"):
-    # FINAL 94 - NIVEL SOLO COLOR VERDE AMARILLO ROJO, SIN REPETIR LO DE LA CALIFICACION REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95 REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     # FINAL 66: AUTO SI SIRVE, como antes. Auto = detectar el grupo por pagina, leyendo lo que dice el PDF (1A, 2A, 1B, 3C, etc).
@@ -1221,10 +1263,10 @@ def generar_pdf_ficha_alumno(nombre_al, escuela, grupo):
     t=Table(datos, colWidths=[0.95*inch,0.95*inch,1.45*inch,1.45*inch,1.15*inch,1.35*inch])
     t.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0), colors.HexColor("#1B2A41")),("BACKGROUND",(0,1),(-1,1), colors.HexColor("#F1F5F9")),("GRID",(0,0),(-1,-1),0.5, colors.HexColor("#CBD5E1")),("VALIGN",(0,0),(-1,-1),"MIDDLE"),("TOPPADDING",(0,0),(-1,-1),7),("BOTTOMPADDING",(0,0),(-1,-1),7)]))
     elementos.append(t)
-    # FINAL 84: CALIFICACION FINAL POR APARTADO - esto es lo que pediste, profe
-    # Cada apartado: promedio 0-10, peso %, y cuanto aporta a la final. Al final, la calificacion final del trimestre.
+    # FINAL 95: PDF FICHA - Durante trimestre SOLO Historial, al final SOLO Desglose final
+    _es_final_pdf = trimestre_terminado()
     _calc_pdf = calcular_calificacion_final(nombre_al, escuela, grupo)
-    if _calc_pdf:
+    if _es_final_pdf and _calc_pdf:
         elementos.append(Paragraph("Calificación final del trimestre - por apartado", h2))
         _es_sec_pdf = (escuela == ESCUELA_SECUNDARIA_NOMBRE)
         if _es_sec_pdf:
@@ -1251,10 +1293,15 @@ def generar_pdf_ficha_alumno(nombre_al, escuela, grupo):
         if _calc_pdf.get("decimas", 0) > 0:
             elementos.append(Paragraph(f"Base: {_calc_pdf.get('cal_base', _calc_pdf['cal']):.1f} + Décimas por excelente desempeño: {_calc_pdf['decimas']:.1f}", ParagraphStyle("caldet", parent=normal, fontSize=9, alignment=TA_CENTER, textColor=colors.HexColor("#64748B"))))
         elementos.append(Spacer(1, 6))
+    elif not _es_final_pdf:
+        pass
     else:
         elementos.append(Paragraph("Calificación final del trimestre: Todavía no tiene capturas.", h2))
-    elementos.append(Paragraph("Historial completo", h2))
-    if not regs_al:
+    if not _es_final_pdf:
+        elementos.append(Paragraph("Historial completo", h2))
+    if _es_final_pdf:
+        pass
+    elif not regs_al:
         elementos.append(Paragraph("Todavia no tiene capturas.", normal))
     else:
         regs_ord=sorted(regs_al, key=lambda x: x.get("Fecha",""))
@@ -1571,7 +1618,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 94 - NIVEL SOLO COLOR VERDE AMARILLO ROJO, SIN REPETIR LO DE LA CALIFICACION - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -1771,7 +1818,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 94 - NIVEL SOLO COLOR VERDE AMARILLO ROJO, SIN REPETIR LO DE LA CALIFICACION: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
@@ -1954,8 +2001,19 @@ if st.session_state.alumno_activo is not None:
     reincidencia=st.selectbox("Reincidencia", LISTA_CONDUCTAS, key="f_reinc78")
     excelente=st.selectbox("Buena conducta - suma +1 ese día", ["Ninguno","Felicitaciones","Buen trabajo","Ayuda a sus compañeros","Excelente desempeño","Atento"], key="f_excel78")
     anotacion=st.text_area("Anotaciones del día", key="f_anot78", placeholder="Ej: Conversó durante la actividad...")
+    # FINAL 95: NO DEJAR CAPTURAR SI NO ES DIA DE CLASE - como dijo el profe, si configuro Miercoles no debe dejar capturar en Lunes
+    _llave_dias_ficha = f"{escuela}|{grupo_sel}"
+    _dias_clase_ficha = st.session_state.get("dias_clase", {}).get(_llave_dias_ficha, [])
+    _dia_captura = fecha_captura.weekday()
+    _es_dia_clase = (_dia_captura in _dias_clase_ficha) if _dias_clase_ficha else True
+    if not _es_dia_clase:
+        st.error(f"⛔ Hoy es {DIAS_ES[_dia_captura]} y a este grupo le das clase los: {', '.join([DIAS_ES[d] for d in _dias_clase_ficha])}. No puedes capturar hoy.")
+        st.info("Si necesitas capturar otro dia, cambia los dias de clase del grupo primero.")
     if puede_capturar:
         if st.button("💾 Guardar captura", key="btn_guardar_cap_78"):
+            if not _es_dia_clase:
+                st.error("⛔ No se guardó: no es día de clase de este grupo.")
+                st.stop()
             ya_existe=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) and r.get("Estado")==asistencia for r in st.session_state.registros)
             ya_hay_ese_dia=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) for r in st.session_state.registros)
             if ya_existe or ya_hay_ese_dia:
@@ -1963,7 +2021,8 @@ if st.session_state.alumno_activo is not None:
             else:
                 st.session_state.registros.append({"Alumno":nombre_al,"Escuela":escuela,"Grupo":grupo_sel,"Trimestre":st.session_state.trimestre_cargado_nombre,"Fecha":str(fecha_captura),"FechaBonita":fecha_bonita(fecha_captura),"Estado":asistencia,"Trabajo":trabajo,"Tarea":tarea,"Indisciplina":indis,"Practica":practica,"Proyecto":proyecto,"Reincidencia":reincidencia,"Excelente":excelente,"Anotacion":anotacion,"Examen":examen_val,"FechaExamen":str(_fecha_examen_guardada) if _fecha_examen_guardada else ""})
                 _guardar_listas_archivo()
-                st.success(f"Guardado - {fecha_bonita(fecha_captura)}"); st.rerun()
+                _guardar_en_gsheets()
+                st.success(f"Guardado - {fecha_bonita(fecha_captura)} - Ya quedó guardado en tu Google Sheet"); st.rerun()
     else:
         st.write("No se puede guardar fuera del trimestre.")
     st.divider()
