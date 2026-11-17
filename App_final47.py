@@ -1,5 +1,6 @@
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final74.py
+
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final80.py
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
@@ -243,6 +244,187 @@ LISTAS_FIJAS_SECUNDARIA = {
 "ROSALES MASCORRO SANTIAGO"
 ]
 }
+# ===== FINAL 80: TOMAS GAMEROS ADENTRO DEL CODIGO - leido de LISTAS_DE_LOS_GRUPOS.pdf que mandaste =====
+# 1-A 28 + 2-A 28 + 3-A 26 + 4-A 18 + 5-A 18 + 5-B 18 + 6-A 26 = 162 alumnos. Ya no hay que subir su PDF nunca mas.
+LISTAS_FIJAS_TOMAS = {
+"1A": [
+"AGUIRRE OCHOA JESUS FERNANDO",
+"ALARCON SOLIS EIDAN ASAHEL",
+"BUSTILLOS MORALES ARLETTE ZAHORY",
+"CARRILLO GONZALEZ MARCOS JOSE",
+"CORCHADO MORENO DAILYN REGINA",
+"FLORES GRANADOS MARIBEL",
+"GONZALEZ RIOS DILAN",
+"HERMOSILLO RIVERO EMILIANO ALEJANDRO",
+"HIDALGO CASTILLO JUAN ADRIAN",
+"LOYA CANO JESUS ANTONIO",
+"MANRIQUEZ DUARTE MELINA",
+"MANRIQUEZ DUARTE MELISA",
+"MARES SANCHEZ FERNANDO OMAR",
+"MATA MENDOZA LUIS ANGEL",
+"MEDRANO VILLA LUISA DANIELA",
+"MELENDEZ TABURA EDNA REGINA",
+"MILLAN VILLALBA ISAAC",
+"MIRANDA FRANCO AARON",
+"MORALES LOPEZ NATALIA JIMENA",
+"NORIEGA FLORES MATIAS",
+"PEREZ DEL TORO EMILY SAMANTHA",
+"RAMIREZ HIDALGO NOAH PAULETH",
+"ROSALES NUÑEZ RENATA VICTORIA",
+"RUBIO HINOJOSA ISMAEL",
+"RUBIO RAMIREZ ELEAZAR",
+"VALAZQUEZ GONZALEZ MAYLIN JOHANA",
+"VILLALOBOS ESPARZA REGINA",
+"YAÑEZ RAMOS EMMANUEL ALI",
+],
+"2A": [
+"AGUILAR CASTILLO LUIS FERNANDO",
+"AGUILAR RODRIGUEZ MARLENE ISABELLA",
+"AL KUBAISI NAVA HAYDER KHALID FALAH",
+"ARZATE MUÑOZ ENOC ISAY",
+"ARZATE MUÑOZ SERGIO ISAIAS",
+"CASTILLO JAQUEZ AMERICA DALILA",
+"CHAVEZ CARREON AIRAM VALENTINA",
+"DELGADO HERNANDEZ CARLOS DANIEL",
+"FRANCO VIOLETA MARIO ALEXIS",
+"GALLEGOS MOLINA ADAMARIS",
+"GOMEZ RUBIO MARIA FERNANDA",
+"HERNANDEZ LOZANO AARON ENRIQUE",
+"HERNANDEZ LOZANO JULIAN ALONSO",
+"HERRERA ESTRADA MANUEL HUMBERTO",
+"HOLGUIN VASQUEZ CAMILA ABIGAIL",
+"LAREZ SOTO SOFIA VICTORIA",
+"LECHUGA LEYVA MATEO",
+"LERMA KATAJIRI DAYAMI ANDREA",
+"LOPEZ CRUZ SOFIA MABEL",
+"MAGALLANES DUARTE PAULETTE NOEMY",
+"MELENDEZ CARRILLO TADEO",
+"MELENDEZ HOLGUIN DYLAN VIDAL",
+"MOLINAR CARDENAS ALAN HUMBERTO",
+"MONTES ALDACO ABRAHAM ELIAN",
+"NUÑEZ JIMENEZ DAVID SEBASTIAN",
+"ORTEGA CARLOS DAMIAN",
+"ORTEGA BACA ANDREA",
+"TORRES AGUERO DAYLIN NAHOMY",
+],
+"3A": [
+"ALDERETE FIERRO IRVING MANUEL",
+"ALVAREZ TARIN ARIEL ALEXANDER",
+"ARANDA MARTINEZ ELINA",
+"ARMENDARIZ LUJAN SARA ILIANA",
+"BURROLA ARMENDARIZ ISABELLA",
+"FLORES VEGA CORALINE ALEJANDRA",
+"FRANCO ROMERO ARIAN",
+"GALLEGOS RIVAS MAURICIO",
+"GONZALEZ EMILIO HUMBERTO",
+"GONZALEZ CANO HEISOL DANIELA",
+"GUERRERO MENDEZ JESUS AARON",
+"HERNANDEZ DE LA CRUZ ELIETH SAMARA",
+"HERNANDEZ ESPINOZA JUAN SAID",
+"LEDEZMA TERRAZAS RAMON",
+"MEDINA REYES KAROL ALBERTO",
+"MEDRANO VILLA DANIELA AMAIRANY",
+"MELENDEZ CARRILLO JR ENRIQUE",
+"MELENDEZ TABURA ROGELIO ALBERTO",
+"MENDOZA PRIMO KARLA VALERIA",
+"MOLINAR CUEVAS MARIA RENATA",
+"RAMIREZ CALVILLO JONATHAN DANIEL",
+"RICO ARZABALA TADEO LEONEL",
+"RUBIO MARQUEZ EMMA GERALDINE",
+"SILVA CERA ABRIL ELENA",
+"TAPIA SANCHEZ DOMINIC",
+"VILLEGAS LOZANO JAZMIN LUCIA",
+],
+"4A": [
+"AGUILAR GONZALEZ BENJAMIN ISAAC",
+"ARMENDARIZ FIERRO AARON GERARDO",
+"BALDERRAMA ZUBIA IRIS ANDREA",
+"BEJAR MACIAS OSCAR MANUEL",
+"CARRASCO DELGADO MATEO",
+"CHAVIRA BEJARANO EMILY",
+"CHAVIRA GONZALEZ LUIS EMILIO",
+"DEL HIERRO RODRIGUEZ VICTORIA",
+"FIERRO VALENZUELA JOSE RAYMUNDO",
+"FLORES CORRAL LIA MARIANA",
+"GALLEGOS RIVAS KARLA MICHELL",
+"GONZALEZ ORTEGA ALISON GERALDINE",
+"GONZALEZ VAZQUEZ KARINA",
+"MANRIQUEZ DUARTE ELIAR RAFAEL",
+"NAJERA MUÑIZ JORGE LUIS",
+"PACHECO VICENCIO CALEB EDUARDO",
+"RODRIGUEZ DOMINGUEZ RENATA",
+"SOTO OLIVAS RENATA",
+],
+"5A": [
+"ARMENDARIZ NIÑO PAULINA",
+"CHAVEZ CALDERON CAMILA",
+"ESTRADA RAMIREZ ROBERTA",
+"FIGUEROA RODRIGUEZ CARIME IVANA",
+"GALLEGOS KEIRY PAOLA",
+"GONZALEZ RIOS KEVIN JESUS",
+"HIDALGO MURGUIA NYAH PATRICIA",
+"LEAL RODRIGUEZ DANTE ANDRE",
+"LOPEZ MOLINA BRISA JAZMIN",
+"MARTINEZ RUBIO ALEC",
+"NAJERA JAQUEZ VALENTINA",
+"OLIVAS ELIAS",
+"ORTEGA LUIS RAUL",
+"RAMOS DOMINGUEZ RENE",
+"RIVERO RAMIREZ ERICK ISAAC",
+"ROMERO DOMINGUEZ MATEO",
+"RUBIO MORALES LUCIANA",
+"VALDEZ VILLALOBOS HELEN ANAHY",
+],
+"5B": [
+"ALVIDREZ AGUILAR CESAR ISAAC",
+"BELTRAN GALLEGOS AMAIRANY RENATA",
+"ESTRADA SAMEER ADRIAN",
+"FLORES JOSELIN SCARLETT",
+"FLORES CORRAL DEMIAN IRAM",
+"HERNANDEZ RODRIGUEZ MAXIMILIANO",
+"JAQUEZ CARRILLO CESAR EMILIO",
+"MARQUEZ GONZALEZ EDGAR MATEO",
+"MEDINA QUEZADA AXEL AARON",
+"MOLINAR CARDENAS PAULINA YULISSA",
+"NUÑEZ GARDEA LUISA YANELI",
+"OCON GONZALEZ JAZIEL ALONSO",
+"ORTEGA LOZANO KARLA ISABELLA",
+"RAMOS PACHECO OSMAR TADEO",
+"RODRIGUEZ ROBERTO",
+"RUBIO HINOJOSA LUIS ANGEL",
+"TARIN CASTILLO AYLI",
+"VILLALOBOS ESPARZA MIA",
+],
+"6A": [
+"AL KUBAISI NAVA ALHASSAN ALI",
+"AVILA SAUCEDO DANIELA ROSARIO",
+"BALDERRAMA GONZALEZ DYLAN",
+"CENICEROS BANDA ZADQUIEL",
+"CHAVIRA BEJARANO ISABELLA",
+"DELGADO DERMA DEMETRIO",
+"FIERRO OLIVAS ANGEL SEBASTIAN",
+"GANDARA VENZOR DAEL ALEJANDRO",
+"GARCIA VARGAS ANAHI",
+"GOMEZ SERRANO KENDRA GISELLE",
+"GUERRERO VALENCIA RAUL ISAIAS",
+"HERNANDEZ MARTINEZ ALEXA",
+"LAZALDE CARMONA DANIA YAMILETH",
+"LOPEZ CRUZ SERGIO IRAM",
+"MENDIAS MENDOZA LYA JARETH",
+"MOLINAR CUEVAS MARIO",
+"MUÑOZ GONZALEZ PAUL GERARDO",
+"PONCE RUEDA ALISON ARIADNE",
+"RABAGO MERINO ALEXA MARILE",
+"RIVAS OLAVE KENDRA NICOLE",
+"SOSA TORRES MARIA TERESA",
+"TERAN SANCHEZ MARCO ELI",
+"VELASCO RAMIREZ VICTOR GAEL",
+"VELAZQUEZ GONZALEZ ALEXA JOKEBED",
+"VENEGAS MOLINA MIGUEL ANGEL",
+"VILLALOBOS SAENZ EMIR GERARDO",
+],
+}
+ESCUELA_TOMAS_NOMBRE = "TOMAS GAMEROS # 2131"
 ESCUELA_UNIDAD_NOMBRE = "UNIDAD PROLETARIA # 2294"
 ESCUELA_SECUNDARIA_NOMBRE = "ESCUELA SECUNDARIA ESTATAL # 3046"
 
@@ -383,35 +565,17 @@ def mostrar_encabezado():
         st.markdown("<h1 style='text-align:center;font-size:clamp(22px,6vw,36px);word-break:break-word;'>⭐ Mis Trabajos y Calificaciones</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align:center;font-size:clamp(14px,4vw,20px);word-break:break-word;'>Docente: Mario Alberto Diaz Becerra</p>", unsafe_allow_html=True)
 
-# ===== LISTAS EN ARCHIVO listas.json - para no volver a subir los PDFs a cada rato =====
-# Antes alumnos y capturas solo vivian en la memoria. Si cerrabas el programa, se borraban y tenias que volver a subir los PDFs.
-# Ahora cada que cargas PDFs o guardas una captura, se escribe listas.json en la misma carpeta, y al abrir se lee de ahi.
+# ===== FINAL 79: YA NO SE USA NINGUN JSON DE LA NUBE =====
+# Los archivos listas.json, trimestres.json y dias_clase.json YA NO SE RESPETAN porque Streamlit Cloud los BORRA cada vez que se reinicia o subes una version nueva.
+# Por eso desaparecieron tus listas y tus trimestres: no es que el programa no los leyera, es que la nube ya los habia borrado antes de abrir.
+# A partir de ahora: TODO vive ADENTRO DEL CODIGO (UNIDAD 172, SECUNDARIA 42, los 3 trimestres, los dias por defecto) + en la memoria mientras usas la app.
+# Lo UNICO que si se guarda de verdad es el RESPALDO que TU descargas con el boton "Descargar Respaldo" y que TU vuelves a subir con "Restaurar Respaldo" cuando subas una version nueva.
+# Ya no se escribe ni se lee ningun .json de la nube.
 def _guardar_listas_archivo():
-    try:
-        import json
-        with open("listas.json", "w", encoding="utf-8") as _f:
-            json.dump({"alumnos": st.session_state.get("alumnos", []), "registros": st.session_state.get("registros", [])}, _f, ensure_ascii=False, indent=2)
-    except:
-        pass
+    # Ya no escribe listas.json. Solo queda en memoria. Para guardar de verdad, usa Descargar Respaldo.
+    return
 def _cargar_listas_archivo():
-    try:
-        import json, os
-        if os.path.exists("listas.json"):
-            with open("listas.json", "r", encoding="utf-8") as _f:
-                _d = json.load(_f)
-            _als = _d.get("alumnos", [])
-            # Quitar repetidos: mismo nombre + grupo + escuela = uno solo. Si subiste 2 veces el mismo PDF, se duplicaba.
-            _vistos = set(); _limpios = []
-            for _a in _als:
-                # FINAL 60: si un alumno no tiene escuela, no lo metas en ninguna. Antes se colaba en la primera escuela que abrías.
-                if not _a.get("Escuela"):
-                    continue
-                _k = (_a.get("Nombre","").strip().lower(), _a.get("Grupo",""), _a.get("Escuela",""))
-                if _k not in _vistos:
-                    _vistos.add(_k); _limpios.append(_a)
-            return _limpios, _d.get("registros", [])
-    except:
-        pass
+    # FINAL 79: ya no se lee listas.json de la nube, porque la nube lo borra. Se regresa vacio y las listas fijas de abajo (UNIDAD + SECUNDARIA) son las que cargan.
     return [], []
 if "alumnos" not in st.session_state: st.session_state.alumnos=[]
 if "registros" not in st.session_state: st.session_state.registros=[]
@@ -420,23 +584,11 @@ if not st.session_state.alumnos and not st.session_state.registros:
     _al, _rg = _cargar_listas_archivo()
     if _al: st.session_state.alumnos = _al
     if _rg: st.session_state.registros = _rg
-# FINAL 69: si te sales a ver el PDF y regresas, el link ya trae en donde estabas. Asi no regresa al inicio.
-try:
-    _qp = st.query_params
-    _esc_q = _qp.get("escuela", None)
-    _gru_q = _qp.get("grupo", None)
-    _alu_q = _qp.get("alumno", None)
-    if _esc_q and not st.session_state.get("escuela_activa"):
-        st.session_state.escuela_activa = _esc_q
-    if _gru_q:
-        st.session_state.grupo_sel_actual = _gru_q
-        st.session_state.grupo_confirmado = _gru_q
-    if _alu_q:
-        st.session_state.alumno_activo = _alu_q
-except Exception:
-    pass
+# FINAL 77: SE QUITO TODO LO DEL LINK ?escuela=&grupo=&alumno= . Eso era lo que te trababa el celular.
+# Ya no se guarda ni se lee nada del link. La navegacion es solo con botones, asi no se cicla ni se inhabilita nada.
+# Si te sales a WhatsApp y regresas, vuelves al inicio y le picas de nuevo a tu escuela y grupo. Es 2 clics, pero nunca se traba.
 # FINAL 67: cargar listas fijas leidas de tus PDFs si todavia no estan. No duplica, no borra capturas.
-for _esc_fija, _listas_fija in [(ESCUELA_UNIDAD_NOMBRE, LISTAS_FIJAS_UNIDAD), (ESCUELA_SECUNDARIA_NOMBRE, LISTAS_FIJAS_SECUNDARIA)]:
+for _esc_fija, _listas_fija in [(ESCUELA_TOMAS_NOMBRE, LISTAS_FIJAS_TOMAS), (ESCUELA_UNIDAD_NOMBRE, LISTAS_FIJAS_UNIDAD), (ESCUELA_SECUNDARIA_NOMBRE, LISTAS_FIJAS_SECUNDARIA)]:
     for _g_fija, _nombres_fija in _listas_fija.items():
         for _n_fija in _nombres_fija:
             _ex = any(a.get("Nombre","").lower()==_n_fija.lower() and a.get("Grupo")==_g_fija and a.get("Escuela")==_esc_fija for a in st.session_state.alumnos)
@@ -444,59 +596,7 @@ for _esc_fija, _listas_fija in [(ESCUELA_UNIDAD_NOMBRE, LISTAS_FIJAS_UNIDAD), (E
                 _mat_fija = "Artes" if (_esc_fija==ESCUELA_SECUNDARIA_NOMBRE and _g_fija=="1B") else ("Electrónica" if _esc_fija==ESCUELA_SECUNDARIA_NOMBRE else "Primaria")
                 st.session_state.alumnos.append({"Nombre": _n_fija, "Escuela": _esc_fija, "Grupo": _g_fija, "Materia": _mat_fija})
 
-# FINAL 70: en celular, mostrar el link donde estas para que lo copies si se te cierra la app
-try:
-    _link_actual = f"?escuela={st.session_state.get('escuela_activa','')}&grupo={st.session_state.get('grupo_sel_actual','')}&alumno={st.session_state.get('alumno_activo','')}"
-    st.caption(f"🔗 Tu lugar: {_link_actual} - Si el celular te saca, pega este link y regresas donde estabas.")
-    # Guardar en el celular mismo, no solo en el link, para que aguante WhatsApp y llamadas
-    try:
-        import streamlit.components.v1 as _comp
-        _esc_js = str(st.session_state.get("escuela_activa","")).replace('"','')
-        _gru_js = str(st.session_state.get("grupo_sel_actual","")).replace('"','')
-        _alu_js = str(st.session_state.get("alumno_activo","")).replace('"','')
-        _comp.html(f"""
-        <script>
-        try{{
-          var lugar = {{escuela: "{_esc_js}", grupo: "{_gru_js}", alumno: "{_alu_js}"}};
-          // Si ya hay escuela, guardarla en el celular
-          if (lugar.escuela) {{ localStorage.setItem("mi_lugar_control_escolar", JSON.stringify(lugar)); }}
-          // Si no hay escuela en el link pero si hay guardada, regresar ahi
-          else {{
-            var guardado = localStorage.getItem("mi_lugar_control_escolar");
-            if (guardado) {{
-              var g = JSON.parse(guardado);
-              if (g.escuela) {{
-                var u = new URL(window.location.href);
-                if (!u.searchParams.get("escuela")) {{
-                  u.searchParams.set("escuela", g.escuela);
-                  if (g.grupo) u.searchParams.set("grupo", g.grupo);
-                  if (g.alumno) u.searchParams.set("alumno", g.alumno);
-                  window.location.href = u.toString();
-                }}
-              }}
-            }}
-          }}
-        }}catch(e){{}}
-        </script>
-        """, height=0)
-    except Exception:
-        pass
-except Exception:
-    pass
-# FINAL 71: NUNCA borrar el link si la memoria esta vacia. Si el celular te cerro la app y regresas, el link es lo unico que te regresa a donde estabas.
-try:
-    _qp2 = st.query_params
-    # Si ya hay lugar en el link, no lo borres aunque la memoria este vacia. Primero se restaura arriba.
-    if st.session_state.get("escuela_activa"):
-        if st.session_state.get("escuela_activa") != _qp2.get("escuela"):
-            _qp2["escuela"] = str(st.session_state.get("escuela_activa"))
-        if st.session_state.get("grupo_sel_actual") and st.session_state.get("grupo_sel_actual") != "-- Elige un grupo --":
-            _qp2["grupo"] = str(st.session_state.get("grupo_sel_actual"))
-        if st.session_state.get("alumno_activo"):
-            _qp2["alumno"] = str(st.session_state.get("alumno_activo"))
-    # Si no hay escuela en memoria pero si en el link, no tocar nada, ya se restauro arriba.
-except Exception:
-    pass
+# FINAL 77: tambien se quito el segundo bloque que escribia en el link a cada rato. Ese era el que hacia que el celular se recargara solo y se inhabilitaran los botones.
 if "escuela_activa" not in st.session_state: st.session_state.escuela_activa=None
 if "alumno_activo" not in st.session_state: st.session_state.alumno_activo=None
 if "trimestre" not in st.session_state: st.session_state.trimestre="Trimestre 2"
@@ -508,22 +608,11 @@ if "trimestre_cargado_nombre" not in st.session_state: st.session_state.trimestr
 # Antes los dias solo vivian en la memoria de la pagina (session_state). Si Streamlit recargaba, si cambiabas de grupo y regresabas, o si se reiniciaba el Deploy, se borraban y te los volvia a pedir.
 # Ahora cada que le picas a Guardar dias, se escriben en dias_clase.json en la misma carpeta, y al abrir se leen de ahi.
 def _cargar_dias_archivo():
-    try:
-        import json, os
-        if os.path.exists("dias_clase.json"):
-            with open("dias_clase.json", "r", encoding="utf-8") as _f:
-                _d = json.load(_f)
-            return _d.get("dias_clase", {}), _d.get("dias_confirmados", {})
-    except:
-        pass
+    # FINAL 79: ya no se lee dias_clase.json de la nube. Los dias viven en memoria + en tu Respaldo.
     return {}, {}
 def _guardar_dias_archivo():
-    try:
-        import json
-        with open("dias_clase.json", "w", encoding="utf-8") as _f:
-            json.dump({"dias_clase": st.session_state.get("dias_clase", {}), "dias_confirmados": st.session_state.get("dias_confirmados", {})}, _f, ensure_ascii=False, indent=2)
-    except:
-        pass
+    # FINAL 79: ya no se escribe dias_clase.json.
+    return
 if "dias_clase" not in st.session_state: st.session_state.dias_clase={}
 if "dias_confirmados" not in st.session_state: st.session_state.dias_confirmados={}
 # Al abrir, si no hay nada en memoria pero si hay archivo, cargarlo. Si ya hay en memoria, no pisarlo.
@@ -561,29 +650,25 @@ def _ir_a_portada_limpio():
 # ===== TRIMESTRES EN ARCHIVO - para que no se quede con el ultimo cargado =====
 # Antes el trimestre solo vivia en la memoria. Si recargabas o cambiabas de pagina, se perdia y se quedaba con el ultimo.
 # Ahora cada trimestre que configuras se guarda en trimestres.json, y al abrir, el programa busca SOLO en que trimestre cae HOY y pone ese.
+# FINAL 78: trimestres POR DEFECTO adentro del codigo. Si la nube borra trimestres.json al reiniciarse, ya no se queda en blanco.
+TRIMESTRES_POR_DEFECTO = [
+    {"nombre": "Trimestre 1", "inicio": "2026-09-01", "fin": "2026-11-30"},
+    {"nombre": "Trimestre 2", "inicio": "2026-12-01", "fin": "2027-03-08"},
+    {"nombre": "Trimestre 3", "inicio": "2027-03-09", "fin": "2027-06-30"},
+]
 def _cargar_trimestres_archivo():
-    try:
-        import json, os
-        if os.path.exists("trimestres.json"):
-            with open("trimestres.json", "r", encoding="utf-8") as _f:
-                _d = json.load(_f)
-            return _d.get("trimestres", [])
-    except:
-        pass
-    return []
+    # FINAL 79: ya no se lee trimestres.json. Siempre se usan los 3 de adentro del codigo, por eso ya no se pierde ninguno.
+    return list(TRIMESTRES_POR_DEFECTO)
 def _guardar_trimestre_archivo(nombre_tri, ini, fin):
+    # FINAL 79: ya no se escribe trimestres.json (la nube lo borra). Se actualiza solo en memoria y en los defaults de arriba.
     try:
-        import json
         _lista = _cargar_trimestres_archivo()
-        # Si ya existe ese trimestre, actualizar sus fechas. Si no, agregarlo.
         _encontrado = False
         for _it in _lista:
             if _it.get("nombre") == nombre_tri:
                 _it["inicio"] = str(ini); _it["fin"] = str(fin); _encontrado = True
         if not _encontrado:
             _lista.append({"nombre": nombre_tri, "inicio": str(ini), "fin": str(fin)})
-        with open("trimestres.json", "w", encoding="utf-8") as _f:
-            json.dump({"trimestres": _lista}, _f, ensure_ascii=False, indent=2)
         return _lista
     except:
         return []
@@ -694,7 +779,7 @@ def trimestre_terminado():
 # ===== LISTAS FIJAS LEIDAS DE TUS PDFs - FINAL 67 =====
 
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - que el programa detecte solo (recomendado)"):
-    # FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     # FINAL 66: AUTO SI SIRVE, como antes. Auto = detectar el grupo por pagina, leyendo lo que dice el PDF (1A, 2A, 1B, 3C, etc).
@@ -1146,10 +1231,8 @@ if st.session_state.escuela_activa is None:
         try:
             import json as _json, os as _os
             _todo = {"alumnos": st.session_state.get("alumnos", []), "registros": st.session_state.get("registros", []), "dias_clase": st.session_state.get("dias_clase", {}), "dias_confirmados": st.session_state.get("dias_confirmados", {})}
-            # Trimestres del archivo
-            try:
-                with open("trimestres.json", "r", encoding="utf-8") as _f: _todo["trimestres"] = _json.load(_f)
-            except: _todo["trimestres"] = {"trimestres": []}
+            # FINAL 79: trimestres de la memoria + defaults, no del archivo (la nube lo borra)
+            _todo["trimestres"] = {"trimestres": _cargar_trimestres_archivo()}
             _bytes = _json.dumps(_todo, ensure_ascii=False, indent=2).encode("utf-8")
             st.download_button("⬇️ Descargar respaldo de TODO (listas + dias + trimestres)", data=_bytes, file_name="respaldo_control_escolar.json", mime="application/json", use_container_width=True)
         except Exception as _e:
@@ -1165,12 +1248,27 @@ if st.session_state.escuela_activa is None:
                 if "dias_clase" in _d: st.session_state.dias_clase = _d["dias_clase"]
                 if "dias_confirmados" in _d: st.session_state.dias_confirmados = _d["dias_confirmados"]
                 if "trimestres" in _d:
-                    with open("trimestres.json", "w", encoding="utf-8") as _f: _json2.dump(_d["trimestres"], _f, ensure_ascii=False, indent=2)
+                    # FINAL 79: ya no se escribe trimestres.json. Los trimestres del respaldo se quedan en memoria al restaurar.
+                    pass
                 _guardar_listas_archivo(); _guardar_dias_archivo()
                 st.success("✅ Restaurado. Ya quedaron igual telefono y compu.")
                 st.rerun()
             except Exception as _e:
                 st.error(f"No se pudo restaurar: {_e}")
+    # FINAL 75: si no ves alumnos, es porque la nube se reinicio al subir la nueva version y borro listas.json. UNIDAD y SECUNDARIA estan adentro del codigo y regresan solas. TOMAS tambien, ya esta adentro del codigo desde la Final 80.
+    _total_al = len(st.session_state.get("alumnos", []))
+    st.info(f"👥 Ahorita tienes {_total_al} alumnos cargados en total. TOMAS debe tener 162, UNIDAD 172 y SECUNDARIA 42 = 376 en total. Si te sale 0, no se borraron, solo se reinició la nube al subir la versión nueva. Pícale a Recuperar.")
+    if st.button("🔄 Recuperar listas de TOMAS, UNIDAD y SECUNDARIA - Si no ves alumnos, pícale aquí", use_container_width=True):
+        _agregados = 0
+        for _esc_fija, _listas_fija in [(ESCUELA_TOMAS_NOMBRE, LISTAS_FIJAS_TOMAS), (ESCUELA_UNIDAD_NOMBRE, LISTAS_FIJAS_UNIDAD), (ESCUELA_SECUNDARIA_NOMBRE, LISTAS_FIJAS_SECUNDARIA)]:
+            for _g_fija, _nombres_fija in _listas_fija.items():
+                for _n_fija in _nombres_fija:
+                    _ex = any(a.get("Nombre","").lower()==_n_fija.lower() and a.get("Grupo")==_g_fija and a.get("Escuela")==_esc_fija for a in st.session_state.alumnos)
+                    if not _ex:
+                        _mat_fija = "Artes" if (_esc_fija==ESCUELA_SECUNDARIA_NOMBRE and _g_fija=="1B") else ("Electrónica" if _esc_fija==ESCUELA_SECUNDARIA_NOMBRE else "Primaria")
+                        st.session_state.alumnos.append({"Nombre": _n_fija, "Escuela": _esc_fija, "Grupo": _g_fija, "Materia": _mat_fija}); _agregados += 1
+        _guardar_listas_archivo(); st.success(f"✅ Recuperados {_agregados} alumnos de TOMAS, UNIDAD y SECUNDARIA. Ya deben salir otra vez."); st.rerun()
+    st.write("✅ TOMAS ya está adentro del código. Ya no tienes que subir su PDF nunca más. Si no te sale TOMAS, pícale a Recuperar de arriba.")
     st.subheader("Elige una escuela para entrar:")
     st.write("")
     if st.button("🏫 Tomas Gameros # 2131  •  Primaria  •  Artes", use_container_width=True):
@@ -1218,16 +1316,14 @@ if st.session_state.get("alumno_activo") is not None:
 # ===== ENCABEZADO FIJO ADENTRO - MISMO QUE EN PORTADA =====
 mostrar_encabezado()
 if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62: si estas en la ficha, NO mostrar configurar. Solo ficha.
-    if st.session_state.trimestre_cargado and not trimestre_terminado(): st.success(f"✅ {st.session_state.trimestre_cargado_nombre} CARGADO - Del {fecha_bonita(st.session_state.tri_inicio)} al {fecha_bonita(st.session_state.tri_fin)} - Hoy: {fecha_bonita(hoy)}")
-    elif st.session_state.trimestre_cargado and trimestre_terminado(): st.info(f"ℹ️ {st.session_state.trimestre_cargado_nombre} ya terminó el {fecha_bonita(st.session_state.tri_fin)}. Carga el siguiente cuando quieras.")
-    else: st.warning("⚠️ No has cargado trimestre. Regresa a la portada y pícale a CARGAR ESTE TRIMESTRE.")
+    # FINAL 78: sin aviso de trimestre en cada pantalla, solo en portada.
     st.header(f"🏫 {escuela}")
     _n_esta = len([a for a in st.session_state.alumnos if a.get("Escuela")==escuela])
     _n_otras = len([a for a in st.session_state.alumnos if a.get("Escuela")!=escuela])
-    st.info(f"En {escuela} tienes {_n_esta} alumnos. En las otras escuelas tienes {_n_otras} alumnos (en su cajon, no aqui). Si aqui te salen los de TOMAS, es porque antes se guardaron mal. Picale abajo a Eliminar TODA la lista de esta escuela y vuelve a subirla bien.")
+    # FINAL 78: sin leyendas de conteo, para que la lista salga luego luego.
     _n_esta = len([a for a in st.session_state.alumnos if a.get("Escuela")==escuela])
     _n_otras = len([a for a in st.session_state.alumnos if a.get("Escuela")!=escuela])
-    st.info(f"📦 En {escuela} tienes {_n_esta} alumnos. En las otras escuelas tienes {_n_otras} alumnos (en su cajón, no aquí). Si aquí te salen los de TOMAS, es porque antes se guardaron mal. Pícale abajo a Eliminar TODA la lista de esta escuela y vuelve a subirla bien.")
+
     st.write("")
     if st.button("⬅️ Regresar a la portada"):
         _ir_a_portada_limpio()
@@ -1261,7 +1357,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -1461,7 +1557,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 74 - REINCIDENCIA QUITA 1 A PARTIR DE LA 2DA + EXCELENTE SUMA DECIMAS: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 80 - TOMAS GAMEROS ADENTRO DEL CODIGO + YA NO SE USA NINGUN JSON DE LA NUBE: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
@@ -1547,173 +1643,102 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
             st.info(f"Vas a guardar: **{', '.join(nombres_dias_grupo)}** - Pícale a **Guardar días** para entrar a la lista.")
 if st.session_state.alumno_activo is not None:
     nombre_al=st.session_state.alumno_activo
-    st.divider()
-    st.subheader(f"📁 {nombre_al}")
-    st.write(f"{escuela}  •  Grupo {grupo_sel}")
-    st.write("")
-    if st.button("⬅️ Regresar a la lista de "+grupo_sel):
+    # --- FINAL 78: FICHA LIMPIA, EN ESTE ORDEN Y SIN LEYENDAS ---
+    # 1. Nombre del alumno + Regresar (arriba, siempre visible)
+    # 2. Dia de captura
+    # 3. Apartados para capturar + Guardar
+    # 4. Estatus verde / amarillo / rojo
+    # 5. Generar PDF (solo cuando le picas, antes se generaba solo y trababa la pagina)
+    # Ya NO se genera el PDF solo al abrir la ficha. Eso era lo que hacia que todo se pusiera lento y no te dejara volver atras.
+    if st.button("⬅️ Regresar a la lista de "+grupo_sel, key="btn_regresar_lista_ficha_78"):
         st.session_state.alumno_activo=None; st.rerun()
-    st.write("")
-    nivel, texto_riesgo, faltas, retardos, no_trab, no_tarea, indis_n, regs_al = riesgo_de_alumno(nombre_al, escuela, grupo_sel)
-    if nivel=="VERDE": st.success(f"🟢 NORMAL - {texto_riesgo}")
-    elif nivel=="AMARILLO": st.warning(f"🟡 EN PELIGRO - {texto_riesgo}")
-    else: st.error(f"🔴 REPROBADO - {texto_riesgo}")
-    st.write(f"**Factor de riesgo:**  😢 Faltas: {faltas}  •  📄❌ No entregó trabajo: {no_trab}  •  ✉️❌ No entregó tarea: {no_tarea}  •  😡 Indisciplinas: {indis_n}")
+    st.subheader(f"{nombre_al}")
+    st.write(f"{escuela}  •  Grupo {grupo_sel}")
     st.divider()
-    st.subheader("📄 Exportar esta ficha a PDF")
-    try:
-        pdf_ficha=generar_pdf_ficha_alumno(nombre_al, escuela, grupo_sel)
-        # Link completo para mandartelo a WhatsApp y regresar directo a esta ficha aunque el celular te cierre la app
-        try:
-            import urllib.parse as _up
-            _link_completo = "https://control-escolar-conche.streamlit.app/?" + _up.urlencode({"escuela": st.session_state.get("escuela_activa",""), "grupo": st.session_state.get("grupo_sel_actual",""), "alumno": st.session_state.get("alumno_activo","")})
-            st.code(_link_completo, language="text")
-            st.caption("👆 Copia este link y mándatelo a ti mismo por WhatsApp. Si te entra una llamada o te sales a WhatsApp y el celular te saca, pícale a ese link y te abre directo en esta ficha, no en el inicio.")
-        except Exception:
-            pass
-        st.info("📱 CELULAR: No le piques al PDF y luego a Regresar, porque el celular te saca de la app y te dice 'esta página no existe'. Pícale a Generar PDF, déjalo que se descargue, y regresa a esta pestaña con el botón de pestañas. No uses Regresar del navegador.")
-        st.download_button(label=f"📄 Generar PDF de esta ficha", data=pdf_ficha, file_name=f"Ficha_{nombre_al.replace(' ','_')}_{grupo_sel}_{st.session_state.trimestre_cargado_nombre or 'Trimestre'}.pdf", mime="application/pdf", use_container_width=True)
-    except Exception as e:
-        st.error(f"No se pudo generar el PDF: {e}. Instala con: py -m pip install reportlab")
-    st.divider()
-    st.subheader("✏️ Llenar captura - Con el día que es")
-    # PARA ESO SE CARGA EL TRIMESTRE: el programa ya sabe cuando empieza y termina y no deja capturar fuera
-    # NUNCA error fatal, solo leyendita en cuadrito azul (st.info)
-    puede_capturar = True
-    motivo_bloqueo = ""
+    # 2. Dia de captura - ARRIBA, no al final
     if not st.session_state.trimestre_cargado:
-        puede_capturar = False
-        motivo_bloqueo = "Todavía no has cargado el trimestre. Regresa a la portada, pon desde cuándo hasta cuándo es, y pícale a CARGAR ESTE TRIMESTRE. Para eso se carga el trimestre, para que el programa sepa cuándo sí puedes capturar."
+        fecha_por_defecto = hoy
     elif hoy < st.session_state.tri_inicio:
-        puede_capturar = False
-        motivo_bloqueo = f"Tu trimestre {st.session_state.trimestre_cargado_nombre} todavía no empieza. Empieza el {fecha_bonita(st.session_state.tri_inicio)} y hoy es {fecha_bonita(hoy)}. Mañana que ya sea {fecha_bonita(st.session_state.tri_inicio)} ya vas a poder capturar. Por eso cargaste el trimestre, para que no te deje capturar antes de que empiece."
+        fecha_por_defecto = st.session_state.tri_inicio
     elif hoy > st.session_state.tri_fin:
-        puede_capturar = False
-        motivo_bloqueo = f"Tu trimestre {st.session_state.trimestre_cargado_nombre} ya se acabó el {fecha_bonita(st.session_state.tri_fin)} y hoy es {fecha_bonita(hoy)}. Ya no se puede capturar de ese trimestre. Carga el siguiente trimestre en la portada para que ya puedas capturar otra vez. Por eso cargaste el trimestre, para que no te deje capturar después de que se acabó."
+        fecha_por_defecto = st.session_state.tri_fin
     else:
-        st.info(f"ℹ️ Hoy es {fecha_bonita(hoy)} - Estás dentro del {st.session_state.trimestre_cargado_nombre} que va del {fecha_bonita(st.session_state.tri_inicio)} al {fecha_bonita(st.session_state.tri_fin)}. Sí puedes capturar.")
-    if not puede_capturar:
-        st.info(f"ℹ️ {motivo_bloqueo}")
-        st.write("")
-        st.write("Abajo te dejo ver el historial, pero no te dejo guardar captura nueva hasta que estés dentro del trimestre que cargaste.")
-    if True:
-        # Fecha por defecto SIEMPRE dentro del trimestre cargado, para que nunca se truene
-        # Si hoy está dentro, usa hoy. Si hoy está antes, usa el inicio. Si hoy está después, usa el fin.
-        if not st.session_state.trimestre_cargado:
-            fecha_por_defecto = hoy
-        elif hoy < st.session_state.tri_inicio:
-            fecha_por_defecto = st.session_state.tri_inicio
-        elif hoy > st.session_state.tri_fin:
-            fecha_por_defecto = st.session_state.tri_fin
-        else:
-            fecha_por_defecto = hoy
-        # SIN min_value ni max_value para que nunca salga el error fatal StreamlitValueBelowMinError
-        fecha_captura=st.date_input("📅 ¿De qué día es esta captura?", value=fecha_por_defecto, key=f"fecha_cap_{nombre_al}_36")
-        st.write(f"Vas a guardar la captura del **{fecha_bonita(fecha_captura)}**")
-        if st.session_state.trimestre_cargado and (fecha_captura < st.session_state.tri_inicio or fecha_captura > st.session_state.tri_fin):
-            st.info(f"ℹ️ Esa fecha no está dentro del trimestre que cargaste ({st.session_state.trimestre_cargado_nombre} del {fecha_bonita(st.session_state.tri_inicio)} al {fecha_bonita(st.session_state.tri_fin)}). Por eso no te voy a dejar guardarla, para que no se revuelva con otro trimestre.")
-            puede_capturar = False
-        if fecha_captura.weekday() not in dias_clase_grupo:
-            st.info(f"ℹ️ Ojo: El {fecha_bonita(fecha_captura)} es {DIAS_ES[fecha_captura.weekday()]} y a {grupo_sel} le das clase los {', '.join(nombres_dias_grupo)}.")
-        st.subheader("✏️ Captura del día - Todo suma a la calificación")
-        col1,col2=st.columns(2)
-        with col1:
-            asistencia=st.selectbox("😊 Asistencia - Vale 5%", ["😊 Asistió","⏰ Retardo","😢 Falta"], key="f_asis21")
-            trabajo=st.selectbox("📄 Trabajo - Vale 30%", LISTA_TRABAJOS, key="f_trab21")
-            practica=st.selectbox("🧪 Prácticas / Trabajos especiales - Vale 25%", LISTA_PRACTICAS, key="f_prac72")
-        with col2:
-            tarea=st.selectbox("✉️ Tarea - Vale 5%", ["✉️ Entregó","✉️❌ No entregó","No se pidió"], key="f_tar21")
-            indis=st.selectbox("Conducta en clase - Vale 10%", LISTA_CONDUCTAS, key="f_ind21")
-            proyecto=st.selectbox("🏆 Proyecto final - Vale 25%", LISTA_PROYECTOS, key="f_proy72")
-        st.write("**🔁 Reincidencia conductual** - Quita poquito: la 1ra vez no quita, a partir de la 2da vez en lo mismo le quita 1 punto en Conducta. Para saber en qué falla siempre el alumno.")
-        reincidencia=st.selectbox("🔁 Reincidencia", LISTA_CONDUCTAS, key="f_reinc72")
-        st.write("**⭐ Excelente desempeño y Felicitaciones** - Suma poquito, décimas extras al final por si las necesita. Si hoy se portó excelente o lo felicitaste, márcalo aquí.")
-        excelente=st.selectbox("⭐ Excelente desempeño / Felicitaciones", ["Ninguno","Excelente desempeño en la actividad","Felicitación por buen trabajo","Felicitación por ayuda a compañeros","Excelente desempeño + Felicitación"], key="f_excel74")
-        st.caption("Si no hay práctica o proyecto hoy, déjalos en 'No se pidió / Todavía no se pide'. No cuentan hasta que los captures al final del trimestre.")
-        anotacion=st.text_area("📝 Anotaciones del día", key="f_anot21", placeholder="Ej: Conversó durante la actividad, se levantó de su lugar...")
-        st.write("")
-        colg1,colg2=st.columns(2)
-        with colg1:
-            if puede_capturar:
-                if st.button(f"💾 Guardar captura"):
-                    ya_existe=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) and r.get("Estado")==asistencia and r.get("Trabajo")==trabajo and r.get("Tarea")==tarea and r.get("Indisciplina")==indis and r.get("Practica")==practica and r.get("Proyecto")==proyecto and r.get("Reincidencia")==reincidencia and r.get("Excelente")==excelente and r.get("Anotacion")==anotacion for r in st.session_state.registros)
-                    ya_hay_ese_dia=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) for r in st.session_state.registros)
-                    if ya_existe: st.info(f"ℹ️ Ya guardaste esto mismo el {fecha_bonita(fecha_captura)}. No lo guardé otra vez para que no se duplique.")
-                    elif ya_hay_ese_dia: st.info(f"ℹ️ Ya tienes una captura el {fecha_bonita(fecha_captura)} para {nombre_al}. No la guardé para que no se duplique.")
-                    else:
-                        st.session_state.registros.append({"Alumno":nombre_al,"Escuela":escuela,"Grupo":grupo_sel,"Trimestre":st.session_state.trimestre_cargado_nombre,"Fecha":str(fecha_captura),"FechaBonita":fecha_bonita(fecha_captura),"Estado":asistencia,"Trabajo":trabajo,"Tarea":tarea,"Indisciplina":indis,"Practica":practica,"Proyecto":proyecto,"Reincidencia":reincidencia,"Excelente":excelente,"Anotacion":anotacion})
-                        _guardar_listas_archivo()  # Guardar captura en listas.json para no perderla
-                        st.success(f"✅ Guardado para {nombre_al} - Captura del **{fecha_bonita(fecha_captura)}** - {st.session_state.trimestre_cargado_nombre}"); st.rerun()
+        fecha_por_defecto = hoy
+    fecha_captura=st.date_input("📅 Día de captura", value=fecha_por_defecto, key=f"fecha_cap_{nombre_al}_78")
+    puede_capturar = True
+    if st.session_state.trimestre_cargado and (fecha_captura < st.session_state.tri_inicio or fecha_captura > st.session_state.tri_fin):
+        puede_capturar = False
+        st.write(f"Esta fecha no está dentro de {st.session_state.trimestre_cargado_nombre}.")
+    # 3. Apartados para capturar
+    st.subheader("Captura del día")
+    col1,col2=st.columns(2)
+    with col1:
+        asistencia=st.selectbox("Asistencia - 5%", ["😊 Asistió","⏰ Retardo","😢 Falta"], key="f_asis78")
+        trabajo=st.selectbox("Trabajo - 30%", LISTA_TRABAJOS, key="f_trab78")
+        practica=st.selectbox("Prácticas / Trabajos especiales - 25%", LISTA_PRACTICAS, key="f_prac78")
+    with col2:
+        tarea=st.selectbox("Tarea - 5%", ["✉️ Entregó","✉️❌ No entregó","No se pidió"], key="f_tar78")
+        indis=st.selectbox("Conducta en clase - 10%", LISTA_CONDUCTAS, key="f_ind78")
+        proyecto=st.selectbox("Proyecto final - 25%", LISTA_PROYECTOS, key="f_proy78")
+    reincidencia=st.selectbox("Reincidencia", LISTA_CONDUCTAS, key="f_reinc78")
+    excelente=st.selectbox("Excelente desempeño / Felicitaciones", ["Ninguno","Excelente desempeño en la actividad","Felicitación por buen trabajo","Felicitación por ayuda a compañeros","Excelente desempeño + Felicitación"], key="f_excel78")
+    anotacion=st.text_area("Anotaciones del día", key="f_anot78", placeholder="Ej: Conversó durante la actividad...")
+    if puede_capturar:
+        if st.button("💾 Guardar captura", key="btn_guardar_cap_78"):
+            ya_existe=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) and r.get("Estado")==asistencia for r in st.session_state.registros)
+            ya_hay_ese_dia=any(r["Alumno"]==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel and r.get("Trimestre")==st.session_state.trimestre_cargado_nombre and r.get("Fecha")==str(fecha_captura) for r in st.session_state.registros)
+            if ya_existe or ya_hay_ese_dia:
+                st.write("Ya tienes una captura ese día. No la guardé otra vez.")
             else:
-                st.info("ℹ️ No se puede guardar captura ahorita porque estás fuera del trimestre que cargaste. Cambia la fecha a una dentro del trimestre, o carga el trimestre que sí es.")
-        with colg2:
-            if st.button(f"🗑️ Eliminar a este alumno"):
-                for i,a in enumerate(st.session_state.alumnos):
-                    if a["Nombre"]==nombre_al and a["Escuela"]==escuela and a["Grupo"]==grupo_sel:
-                        del st.session_state.alumnos[i]; _guardar_listas_archivo(); break
-                st.session_state.alumno_activo=None; st.success(f"Se eliminó {nombre_al}"); st.rerun()
+                st.session_state.registros.append({"Alumno":nombre_al,"Escuela":escuela,"Grupo":grupo_sel,"Trimestre":st.session_state.trimestre_cargado_nombre,"Fecha":str(fecha_captura),"FechaBonita":fecha_bonita(fecha_captura),"Estado":asistencia,"Trabajo":trabajo,"Tarea":tarea,"Indisciplina":indis,"Practica":practica,"Proyecto":proyecto,"Reincidencia":reincidencia,"Excelente":excelente,"Anotacion":anotacion})
+                _guardar_listas_archivo()
+                st.success(f"Guardado - {fecha_bonita(fecha_captura)}"); st.rerun()
+    else:
+        st.write("No se puede guardar fuera del trimestre.")
     st.divider()
-    # Calificacion que se va sumando
+    # 4. Estatus verde / amarillo / rojo + calificación
+    nivel, texto_riesgo, faltas, retardos, no_trab, no_tarea, indis_n, regs_al = riesgo_de_alumno(nombre_al, escuela, grupo_sel)
+    if nivel=="VERDE":
+        st.success(f"🟢 NORMAL - {texto_riesgo}")
+    elif nivel=="AMARILLO":
+        st.warning(f"🟡 EN PELIGRO - {texto_riesgo}")
+    else:
+        st.error(f"🔴 REPROBADO - {texto_riesgo}")
     _calc = calcular_calificacion_final(nombre_al, escuela, grupo_sel)
     if _calc:
-        st.subheader(f"🏆 Calificación que se va sumando: {_calc['cal']:.1f} / 10")
-        if _calc["es_final"]:
-            st.success("✅ Ya tiene Prácticas y Proyecto, esta ya es su calificación FINAL del trimestre.")
-        else:
-            st.info(f"ℹ️ Parcial - Todavía faltan Prácticas y/o Proyecto (casi siempre al final del trimestre). Se calcula con el {_calc['total_peso']}% que ya tiene capturado. Cuando captures Prácticas y Proyecto, se completa al 100%.")
-        # Control de reincidencia: en que falla siempre, sin quitar puntos
-        _regs_todos = [r for r in st.session_state.registros if r.get("Alumno")==nombre_al and r.get("Escuela")==escuela and r.get("Grupo")==grupo_sel]
-        _tri2 = st.session_state.get("trimestre_cargado_nombre")
-        if _tri2:
-            _regs_todos = [r for r in _regs_todos if r.get("Trimestre")==_tri2]
-        _conteo_reinc = {}
-        for _r in _regs_todos:
-            _v = _r.get("Reincidencia")
-            if _v and _v!="Ninguna":
-                _conteo_reinc[_v] = _conteo_reinc.get(_v, 0) + 1
-        if _conteo_reinc:
-            st.write("**🔁 Control de reincidencia - En qué falla siempre (quita poquito: la 1ra no quita, a partir de la 2da quita 1 punto en Conducta):**")
-            for _cond, _veces in sorted(_conteo_reinc.items(), key=lambda x: -x[1]):
-                st.write(f"- {_cond}: {_veces} veces")
-        else:
-            st.write("🔁 Reincidencia: Todavía no tiene reincidencias registradas.")
-        for _k, (_prom, _n, _peso) in _calc["detalle"].items():
-            if _prom is None:
-                st.write(f"- {_k} ({_peso}%): Todavía no se captura")
-            else:
-                st.write(f"- {_k} ({_peso}%): Promedio {_prom:.1f} / 10 en {_n} capturas → Aporta {(_prom/10)*_peso:.1f} puntos")
+        st.subheader(f"Calificación: {_calc['cal']:.1f} / 10")
         if _calc.get("decimas", 0) > 0:
-            st.write(f"⭐ Décimas extras por Excelente desempeño / Felicitaciones: +{_calc['decimas']:.1f} (tiene {_calc.get('n_excelente',0)} felicitaciones, cada una suma 0.3, máximo +1.0)")
-            st.write(f"Calificación base: {_calc.get('cal_base', _calc['cal']):.1f} + Décimas {_calc['decimas']:.1f} = **Total: {_calc['cal']:.1f}**")
+            st.write(f"Base: {_calc.get('cal_base', _calc['cal']):.1f} + Décimas: {_calc['decimas']:.1f} = Total: {_calc['cal']:.1f}")
+    else:
+        st.write("Todavía no tiene capturas.")
+    st.divider()
+    # 5. Generar PDF - SOLO cuando le picas, no antes
+    if st.button("📄 Generar PDF de esta ficha", key="btn_pdf_ficha_78", use_container_width=True):
+        try:
+            pdf_ficha=generar_pdf_ficha_alumno(nombre_al, escuela, grupo_sel)
+            st.download_button(label="⬇️ Descargar PDF", data=pdf_ficha, file_name=f"Ficha_{nombre_al.replace(' ','_')}_{grupo_sel}.pdf", mime="application/pdf", use_container_width=True, key="dl_pdf_ficha_78")
+        except Exception as e:
+            st.error(f"No se pudo generar el PDF: {e}")
+    if st.button("🗑️ Eliminar a este alumno", key="btn_eliminar_alumno_78"):
+        for i,a in enumerate(st.session_state.alumnos):
+            if a["Nombre"]==nombre_al and a["Escuela"]==escuela and a["Grupo"]==grupo_sel:
+                del st.session_state.alumnos[i]; _guardar_listas_archivo(); break
+        st.session_state.alumno_activo=None; st.rerun()
+    with st.expander("📋 Historial"):
+        if not regs_al:
+            st.write("Todavía no tiene capturas.")
         else:
-            st.write(f"**Total: {_calc['cal']:.1f}**")
-        st.write("⭐ Excelente desempeño: si hoy lo felicitaste o tuvo excelente desempeño, márcalo en la captura. Cada uno suma 0.3 décimas, hasta +1.0 máximo, por si las necesita al final.")
-    else:
-        st.write("Todavía no tiene capturas para calcular calificación.")
-    st.subheader("📋 Historial - Con el día que se guardó")
-    if not regs_al: st.write("Todavía no tiene capturas.")
-    else:
-        regs_ordenados=sorted(regs_al, key=lambda x: x.get("Fecha",""))
-        for idx_r, r in enumerate(regs_ordenados):
-            fecha_mostrar=r.get("FechaBonita") or r.get("Fecha","")
-            if not r.get("FechaBonita") and r.get("Fecha"):
-                try: y,m,d=map(int, r["Fecha"].split("-")); fecha_mostrar=fecha_bonita(date(y,m,d))
-                except: fecha_mostrar=r["Fecha"]
-            st.write(f"**📅 Captura del {fecha_mostrar}** - {r.get('Trimestre','')} - {r['Estado']} - Trabajo: {r['Trabajo']} - Tarea: {r['Tarea']} - Conducta: {r['Indisciplina']}")
-            _extra = []
-            if r.get("Practica") and r.get("Practica")!="No se pidió": _extra.append(f"Práctica: {r.get('Practica')}")
-            if r.get("Proyecto") and r.get("Proyecto") not in ("Todavía no se pide","No se pidió"): _extra.append(f"Proyecto: {r.get('Proyecto')}")
-            if r.get("Reincidencia") and r.get("Reincidencia")!="Ninguna": _extra.append(f"🔁 Reincidencia: {r.get('Reincidencia')}")
-            if r.get("Excelente") and r.get("Excelente")!="Ninguno": _extra.append(f"⭐ {r.get('Excelente')}")
-            if _extra: st.write(" • ".join(_extra))
-            if r["Anotacion"]: st.write(f"📝 {r['Anotacion']}")
-            st.write("")
-            if st.button(f"🗑️ Borrar este día - {fecha_mostrar}", key=f"borrar_dia_{escuela}_{grupo_sel}_{nombre_al}_{idx_r}_{r.get('Fecha','')}_36"):
-                for i, rr in enumerate(st.session_state.registros):
-                    if rr["Alumno"]==nombre_al and rr.get("Escuela")==escuela and rr.get("Grupo")==grupo_sel and rr.get("Fecha")==r.get("Fecha") and rr.get("Estado")==r.get("Estado") and rr.get("Trabajo")==r.get("Trabajo"):
-                        del st.session_state.registros[i]; _guardar_listas_archivo(); break
-                st.success(f"Se borró solo la captura del {fecha_mostrar}."); st.rerun()
-            st.write("---")
+            for idx_r, r in enumerate(sorted(regs_al, key=lambda x: x.get("Fecha",""))):
+                fecha_mostrar=r.get("FechaBonita") or r.get("Fecha","")
+                st.write(f"**{fecha_mostrar}** - {r.get('Trimestre','')} - {r['Estado']} - Trabajo: {r['Trabajo']} - Tarea: {r['Tarea']} - Conducta: {r['Indisciplina']}")
+                if r.get("Anotacion"):
+                    st.write(f"{r['Anotacion']}")
+                if st.button(f"🗑️ Borrar este día - {fecha_mostrar}", key=f"borrar_dia_78_{idx_r}_{r.get('Fecha','')}"):
+                    for i, rr in enumerate(st.session_state.registros):
+                        if rr["Alumno"]==nombre_al and rr.get("Escuela")==escuela and rr.get("Grupo")==grupo_sel and rr.get("Fecha")==r.get("Fecha"):
+                            del st.session_state.registros[i]; _guardar_listas_archivo(); break
+                    st.rerun()
+                st.write("---")
     st.stop()
 st.divider()
 st.header(f"📋 Lista de {grupo_sel} - {escuela}")
