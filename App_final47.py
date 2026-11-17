@@ -1,6 +1,6 @@
 
 # MIS TRABAJOS Y CALIFICACIONES - FINAL 102 - GOOGLE SHEET POR APPS SCRIPT WEBHOOK, RECONSTRUIDA DESDE 99, SIN ERROR NAMEERROR - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final102.py
+# Corre con: py -m streamlit run app_final103.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -2075,14 +2075,7 @@ if st.session_state.alumno_activo is not None:
         st.write("Todavía no tiene capturas.")
     st.divider()
     # 5. Generar PDF - SOLO cuando le picas, no antes
-    # FINAL 98: Boton para probar Google Sheet - para saber por que no guardo nada
-    if st.button("🔍 Probar conexión con Google Sheet", key="btn_probar_gs_98"):
-        _ok_t, _msg_t = _guardar_en_gsheets()
-        if _ok_t:
-            st.success(f"✅ Sí está conectado: {_msg_t}")
-        else:
-            st.error(f"❌ No está conectado: {_msg_t}")
-            st.info("Checa: 1) Que tu pestaña se llame exactamente Registros, 2) Que en Secrets el spreadsheet sea el enlace de tu Sheet, 3) Que compartiste tu Sheet con el correo de la cuenta de servicio como Editor.")
+    # FINAL 102: Solo UN boton Probar - el 98 duplicado se quito
     if st.button("🔍 Probar conexión con Google Sheet", key="btn_probar_gs_102"):
         _ok_t, _msg_t = _guardar_en_gsheets()
         if _ok_t:
