@@ -1,6 +1,5 @@
-
-# MIS TRABAJOS Y CALIFICACIONES - FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95 - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final96.py
+# MIS TRABAJOS Y CALIFICACIONES - FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
+# Corre con: py -m streamlit run app_final98.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -34,16 +33,18 @@ def _cargar_desde_gsheets():
     except:
         return False
 def _guardar_en_gsheets():
-    # Guarda todo en tu Google Sheet despues de cada captura. Si no hay Sheet, no hace nada, no te marca error.
+    # FINAL 97: Guarda en Google Sheet y AVISA si no guardo, para que no se quede callado
     try:
         if not _gsheets_conectado():
-            return
+            return False, "No hay Google Sheet conectado en Secrets"
         conn = st.connection("gsheets", type="GSheetsConnection")
         if st.session_state.get("registros") is not None:
             df = pd.DataFrame(st.session_state.registros)
             conn.update(worksheet="Registros", data=df)
-    except:
-        pass
+            return True, f"Guardado en Google Sheet - {len(df)} capturas en Registros"
+        return False, "No hay registros"
+    except Exception as _e_gs:
+        return False, f"No se pudo guardar en Google Sheet: {_e_gs}"
 from datetime import date, timedelta
 from io import BytesIO
 import re
@@ -955,7 +956,7 @@ def trimestre_terminado():
 # ===== LISTAS FIJAS LEIDAS DE TUS PDFs - FINAL 67 =====
 
 def procesar_un_pdf(datos_pdf, escuela, nombre_archivo, grupo_forzado="Auto - que el programa detecte solo (recomendado)"):
-    # FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95 REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
+    # FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET REHECHO LIMPIO: NO adivina nada. Escuela y grupo son los que TU elegiste arriba.
     # Si dejas el grupo en Auto, NO carga nada y te dice que elijas el grupo a mano. Asi ya no mezcla UNIDAD con TOMAS.
     import fitz
     # FINAL 66: AUTO SI SIRVE, como antes. Auto = detectar el grupo por pagina, leyendo lo que dice el PDF (1A, 2A, 1B, 3C, etc).
@@ -1618,7 +1619,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
                     st.write(f"- **{_it['nombre']}**: del {fecha_bonita(_a)} al {fecha_bonita(_b)}{_eh}")
                 except: st.write(f"- **{_it['nombre']}**")
     st.divider()
-    # ===== UPLOAD FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95 - TU LE DICES DE QUE GRUPO ES CADA PDF =====
+    # ===== UPLOAD FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET - TU LE DICES DE QUE GRUPO ES CADA PDF =====
     if _alumnos_esc_pre:
         with st.expander("📄 Cargar / cambiar PDFs - Ya tienes alumnos cargados, pícale aquí solo si quieres cambiarlos", expanded=False):
             st.subheader("📄 1. Cargar los PDFs de ESTA escuela")
@@ -1818,7 +1819,7 @@ if not modo_lista and st.session_state.get("alumno_activo") is None:  # FINAL 62
         _guardar_listas_archivo()
         st.success(f"✅ Listo. Antes: {_antes} alumnos en total. Ahora: {len(_limp2)}. Se quitaron {_antes-len(_limp2)} repetidos.")
         st.rerun()
-    # BOTON NUEVO FINAL 96 - GOOGLE SHEET COMO BASE DE DATOS + TODO LO DE LA FINAL 95: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
+    # BOTON NUEVO FINAL 98 - NO DEJAR CAPTURAR FECHA FUTURA + BOTON PROBAR GOOGLE SHEET: Eliminar la escuela YA cargada (no solo el PDF antes de cargarlo)
     # Antes solo se podia borrar grupo por grupo. Ahora se borra TODA la escuela de una vez y queda en blanco para volver a subirla bien.
     if st.button(f"🗑️ Eliminar TODA la lista ya cargada de {escuela} y dejar en blanco", key=f"btn_eliminar_escuela_{escuela}_54"):
         _antes_a = len(st.session_state.alumnos)
@@ -2001,9 +2002,26 @@ if st.session_state.alumno_activo is not None:
     reincidencia=st.selectbox("Reincidencia", LISTA_CONDUCTAS, key="f_reinc78")
     excelente=st.selectbox("Buena conducta - suma +1 ese día", ["Ninguno","Felicitaciones","Buen trabajo","Ayuda a sus compañeros","Excelente desempeño","Atento"], key="f_excel78")
     anotacion=st.text_area("Anotaciones del día", key="f_anot78", placeholder="Ej: Conversó durante la actividad...")
-    # FINAL 95: NO DEJAR CAPTURAR SI NO ES DIA DE CLASE - como dijo el profe, si configuro Miercoles no debe dejar capturar en Lunes
+    # FINAL 98: NO DEJAR CAPTURAR CON FECHA FUTURA NI SI NO ES DIA DE CLASE
+    # Si hoy es lunes 16, no puede capturar como martes 17, aunque cambie la fecha en el calendario
+    # La fecha de captura no puede ser mayor que hoy, y tiene que ser dia de clase de ese grupo
+    _es_fecha_futura = fecha_captura > hoy
+    if _es_fecha_futura:
+        st.error(f"⛔ No puedes capturar como {fecha_bonita(fecha_captura)} porque hoy es {fecha_bonita(hoy)}. No puedes capturar un dia que todavia no llega.")
+        st.info("Pon la fecha de hoy para capturar.")
+    # FINAL 97: NO DEJAR CAPTURAR SI NO ES DIA DE CLASE - CORREGIDO: el grupo viene como "2-A" con guion y DIAS_FIJOS es "2A" sin guion, por eso no lo encontraba y dejaba pasar
+    _grupo_norm_ficha = grupo_sel.replace("-", "").replace(" ", "").upper()
     _llave_dias_ficha = f"{escuela}|{grupo_sel}"
+    _llave_dias_ficha_norm = f"{escuela}|{_grupo_norm_ficha}"
     _dias_clase_ficha = st.session_state.get("dias_clase", {}).get(_llave_dias_ficha, [])
+    if not _dias_clase_ficha:
+        _dias_clase_ficha = st.session_state.get("dias_clase", {}).get(_llave_dias_ficha_norm, [])
+    if not _dias_clase_ficha:
+        # Buscar en DIAS_FIJOS directamente, sin guion
+        for _k_f, _v_f in DIAS_FIJOS_PRIMARIAS.items():
+            if _k_f.split("|")[0] == escuela and _k_f.split("|")[1].replace("-", "").upper() == _grupo_norm_ficha:
+                _dias_clase_ficha = list(_v_f)
+                break
     _dia_captura = fecha_captura.weekday()
     _es_dia_clase = (_dia_captura in _dias_clase_ficha) if _dias_clase_ficha else True
     if not _es_dia_clase:
@@ -2011,6 +2029,9 @@ if st.session_state.alumno_activo is not None:
         st.info("Si necesitas capturar otro dia, cambia los dias de clase del grupo primero.")
     if puede_capturar:
         if st.button("💾 Guardar captura", key="btn_guardar_cap_78"):
+            if _es_fecha_futura:
+                st.error("⛔ No se guardó: no puedes capturar una fecha futura.")
+                st.stop()
             if not _es_dia_clase:
                 st.error("⛔ No se guardó: no es día de clase de este grupo.")
                 st.stop()
@@ -2021,8 +2042,12 @@ if st.session_state.alumno_activo is not None:
             else:
                 st.session_state.registros.append({"Alumno":nombre_al,"Escuela":escuela,"Grupo":grupo_sel,"Trimestre":st.session_state.trimestre_cargado_nombre,"Fecha":str(fecha_captura),"FechaBonita":fecha_bonita(fecha_captura),"Estado":asistencia,"Trabajo":trabajo,"Tarea":tarea,"Indisciplina":indis,"Practica":practica,"Proyecto":proyecto,"Reincidencia":reincidencia,"Excelente":excelente,"Anotacion":anotacion,"Examen":examen_val,"FechaExamen":str(_fecha_examen_guardada) if _fecha_examen_guardada else ""})
                 _guardar_listas_archivo()
-                _guardar_en_gsheets()
-                st.success(f"Guardado - {fecha_bonita(fecha_captura)} - Ya quedó guardado en tu Google Sheet"); st.rerun()
+                _ok_gs, _msg_gs = _guardar_en_gsheets()
+                if _ok_gs:
+                    st.success(f"Guardado - {fecha_bonita(fecha_captura)} - {_msg_gs}")
+                else:
+                    st.warning(f"Guardado en la app, pero {_msg_gs}. Revisa tu Google Sheet.")
+                st.rerun()
     else:
         st.write("No se puede guardar fuera del trimestre.")
     st.divider()
@@ -2044,6 +2069,14 @@ if st.session_state.alumno_activo is not None:
         st.write("Todavía no tiene capturas.")
     st.divider()
     # 5. Generar PDF - SOLO cuando le picas, no antes
+    # FINAL 98: Boton para probar Google Sheet - para saber por que no guardo nada
+    if st.button("🔍 Probar conexión con Google Sheet", key="btn_probar_gs_98"):
+        _ok_t, _msg_t = _guardar_en_gsheets()
+        if _ok_t:
+            st.success(f"✅ Sí está conectado: {_msg_t}")
+        else:
+            st.error(f"❌ No está conectado: {_msg_t}")
+            st.info("Checa: 1) Que tu pestaña se llame exactamente Registros, 2) Que en Secrets el spreadsheet sea el enlace de tu Sheet, 3) Que compartiste tu Sheet con el correo de la cuenta de servicio como Editor.")
     if st.button("📄 Generar PDF de esta ficha", key="btn_pdf_ficha_78", use_container_width=True):
         try:
             pdf_ficha=generar_pdf_ficha_alumno(nombre_al, escuela, grupo_sel)
