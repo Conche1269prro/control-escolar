@@ -1,6 +1,6 @@
 
 # MIS TRABAJOS Y CALIFICACIONES - FINAL 102 - GOOGLE SHEET POR APPS SCRIPT WEBHOOK, RECONSTRUIDA DESDE 99, SIN ERROR NAMEERROR - SUBIR 2 PDFs JUNTOS + SIN ERROR FATAL DE FECHAS - SOLO LEYENDITA EN CUADRITO
-# Corre con: py -m streamlit run app_final104.py
+# Corre con: py -m streamlit run app_final105.py
 import streamlit as st
 import pandas as pd
 # FINAL 96: GOOGLE SHEET COMO BASE DE DATOS - para que no se borre nada y puedas capturar en el celular sin Respaldo
@@ -43,8 +43,7 @@ def _guardar_en_gsheets():
             return False, "Falta webhook_url en Secrets - pon el enlace de tu Apps Script"
         import requests
         _regs = st.session_state.get("registros", [])
-        if not _regs:
-            return False, "No hay registros para guardar"
+        # FINAL 105: Aunque no haya registros, SI hay que mandarlo al Sheet para que lo borre. Si no, se queda la fila vieja.
         _r = requests.post(_url, json={"registros": _regs}, timeout=15)
         if _r.status_code in (200, 302):
             return True, f"Guardado en Google Sheet - {len(_regs)} capturas en Registros"
@@ -621,7 +620,7 @@ def mostrar_encabezado():
 # Ya no se escribe ni se lee ningun .json de la nube.
 def _guardar_listas_archivo():
     # Ya no escribe listas.json. Solo queda en memoria. Para guardar de verdad, usa Descargar Respaldo.
-    # FINAL 104: Cada que se guarda o se borra algo, se manda solo al Google Sheet, para que no se quede el borrado en el Sheet
+    # FINAL 105: Cada que se guarda o se borra algo, se manda solo al Google Sheet, para que no se quede el borrado en el Sheet
     try:
         if _gsheets_conectado():
             _guardar_en_gsheets()
